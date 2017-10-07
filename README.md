@@ -1,7 +1,7 @@
 # botify
 Commands to setup the required env.
 
-go get github.com/kardianos/govendor
+go get github.com/kardianos/govendor 
 govendor fetch https://github.com/mekladious/botify
 cd botify/
 export GOPATH=$HOME/Workspace/botify
