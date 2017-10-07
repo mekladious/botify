@@ -5,7 +5,7 @@ Botify helps people to get the music they want as fast as possible, people can a
 
 ```
 go get github.com/kardianos/govendor 
-//govendor fetch https://github.com/mekladious/botify
+#govendor fetch https://github.com/mekladious/botify
 cd botify/
 export GOPATH=$HOME/Workspace/botify
 export PATH=$PATH:$GOPATH/bin
