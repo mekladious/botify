@@ -1,5 +1,7 @@
-# botify
-Commands to setup the required env.
+# Botify
+Botify helps people to get the music they want as fast as possible, people can also tell the chat bot their mood and the bot replies with the appropriate music, people can set an alarm and the bot will choose fresh and inspiring music for their day. Botify can save your favorite music for later time,get new releases and featured playlists..
+
+## Getting Started
 
 ```
 go get github.com/kardianos/govendor 
