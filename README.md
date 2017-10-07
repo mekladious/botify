@@ -19,3 +19,5 @@ govendor sync
 go get github.com/pilu/fresh
 fresh
 ```
+
+### Chatbot deployed on https://botifyy.herokuapp.com/
