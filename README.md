@@ -1,6 +1,7 @@
 # botify
 Commands to setup the required env.
 
+```
 go get github.com/kardianos/govendor 
 govendor fetch https://github.com/mekladious/botify
 cd botify/
@@ -15,3 +16,4 @@ cp .env.local .env
 govendor sync
 go get github.com/pilu/fresh
 fresh
+```
