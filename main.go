@@ -44,7 +44,7 @@ func chatbotProcess(session chatbot.Session, message string) (string, error) {
 
 func main() {
 	// Uncomment the following lines to customize the chatbot
-	chatbot.WelcomeMessage = "What's your name?"
+	chatbot.WelcomeMessage = "Hello, Botify is ready to inspire you ;)"
 	chatbot.ProcessFunc(chatbotProcess)
 
 	// Use the PORT environment variable

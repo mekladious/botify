@@ -1,10 +1,12 @@
 package chatbot
 
 import (
+	"bytes"
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -26,6 +28,8 @@ var (
 	sessions = map[string]Session{}
 
 	processor = sampleProcessor
+
+	spotifyAuthorizationToken string
 )
 
 type (
@@ -79,7 +83,7 @@ func withLog(fn http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		c := httptest.NewRecorder()
 		fn(c, r)
-		log.Printf("[%d] %-4s %s\n", c.Code, r.Method, r.URL.Path)
+		log.Printf("[%d] %-4s %s %s\n", c.Code, r.Method, r.URL.Path, c.Body)
 
 		for k, v := range c.HeaderMap {
 			w.Header()[k] = v
@@ -97,7 +101,7 @@ func writeJSON(w http.ResponseWriter, data JSON) {
 
 // ProcessFunc Sets the processor of the chatbot
 func ProcessFunc(p Processor) {
-	processor = p
+	//processor = p
 }
 
 // handleWelcome Handles /welcome and responds with a welcome message and a generated UUID
@@ -109,6 +113,33 @@ func handleWelcome(w http.ResponseWriter, r *http.Request) {
 
 	// Create a session for this UUID
 	sessions[uuid] = Session{}
+
+	//starting to connect to Spotify
+	if spotifyAuthorizationToken == "" {
+		log.Print("No spotify authorization token.. started to get one")
+		//create a headers map
+		url := "https://accounts.spotify.com/api/token"
+		var jsonStr = []byte(`grant_type=client_credentials`)
+		req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		req.Header.Set("Authorization", "Basic ZDc0NzRjMTg0OGU0NDFmM2FiOTAyMGQyNzM2OTE2ZGE6Y2M4NTU3YTE0ZmFkNDNiNTliMDI4MDc5YmE3ZTM2Yjc=")
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			panic(err)
+		}
+		defer resp.Body.Close()
+
+		//fmt.Println("response Status:", resp.Status)
+		//fmt.Println("response Headers:", resp.Header)
+		body, _ := ioutil.ReadAll(resp.Body)
+		//converting body to json
+		bodyJson := JSON{}
+		err = json.NewDecoder(bytes.NewBuffer(body)).Decode(&bodyJson)
+		spotifyAuthorizationToken, _ = bodyJson["access_token"].(string)
+		fmt.Println("spotify access token:", spotifyAuthorizationToken)
+	}
 
 	// Write a JSON containg the welcome message and the generated UUID
 	writeJSON(w, JSON{
@@ -189,4 +220,28 @@ func Engage(addr string) error {
 
 	// Start the server
 	return http.ListenAndServe(addr, cors.CORS(mux))
+}
+
+func SendPostRequest(url string, body string) (string, string) {
+	fmt.Println("Sending post request to", url)
+
+	// var jsonStr = []byte(`{"title":"Buy cheese and bread for breakfast."}`)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(body)))
+
+	//req.Header.Set("X-Custom-Header", "myvalue")
+	// req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	fmt.Println("response Status:", resp.Status)
+	fmt.Println("response Headers:", resp.Header)
+	respBody, _ := ioutil.ReadAll(resp.Body)
+	fmt.Println("response Body:", string(respBody))
+
+	return string(respBody), string(resp.Status)
 }
