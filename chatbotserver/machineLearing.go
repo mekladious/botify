@@ -28,7 +28,7 @@ func UnknownAnswer(message string) string {
 	if err != nil {
 		fmt.Println(err)
 	}
-	collection := db.DB("botify").C("test")
+	collection := db.DB("botify").C("MachineLearning")
 	// e := entry{Question: "hi"}
 	// err = collection.Insert(&e)
 	var results []entry
