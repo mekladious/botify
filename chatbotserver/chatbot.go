@@ -13,7 +13,6 @@ import (
 	"time"
 
 	cors "github.com/heppu/simple-cors"
-	"github.com/mekladious/botify/machineLearining"
 )
 
 var (
@@ -47,7 +46,7 @@ func sampleProcessor(session Session, message string) (string, error) {
 		featuredPlaylists := Get_featured_playlists()
 		return featuredPlaylists, nil
 	} else {
-		result := machineLearining.UnknownAnswer(message)
+		result := checkForSymbols(UnknownAnswer(message))
 		if result != "" {
 			return result, nil
 		}

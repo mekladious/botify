@@ -1,7 +1,8 @@
-package machineLearining
+package chatbot
 
 import (
 	"fmt"
+	"strings"
 
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -39,4 +40,11 @@ func UnknownAnswer(message string) string {
 		return ""
 	}
 	return results[0].Answer
+}
+
+func checkForSymbols(answer string) string {
+	if strings.Contains(answer, "#Get_featured_playlists") {
+		answer = strings.Replace(answer, "#Get_featured_playlists", Get_featured_playlists(), -1)
+	}
+	return answer
 }
