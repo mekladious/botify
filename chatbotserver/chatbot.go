@@ -1,12 +1,10 @@
 package chatbot
 
 import (
-	"bytes"
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -29,7 +27,7 @@ var (
 
 	processor = sampleProcessor
 
-	spotifyAuthorizationToken string
+	SpotifyAuthorizationToken string
 )
 
 type (
@@ -44,38 +42,44 @@ type (
 )
 
 func sampleProcessor(session Session, message string) (string, error) {
-	// Make sure a history key is defined in the session which points to a slice of strings
-	_, historyFound := session["history"]
-	if !historyFound {
-		session["history"] = []string{}
+	if strings.Contains(strings.ToLower(message), "featured playlists") {
+		featuredPlaylists := Get_featured_playlists()
+		return featuredPlaylists, nil
 	}
+	return "", nil
 
-	// Fetch the history from session and cast it to an array of strings
-	history, _ := session["history"].([]string)
+	// // Make sure a history key is defined in the session which points to a slice of strings
+	// _, historyFound := session["history"]
+	// if !historyFound {
+	// 	session["history"] = []string{}
+	// }
 
-	// Make sure the message is unique in history
-	for _, m := range history {
-		if strings.EqualFold(m, message) {
-			return "", fmt.Errorf("You've already ordered %s before!", message)
-		}
-	}
+	// // Fetch the history from session and cast it to an array of strings
+	// history, _ := session["history"].([]string)
 
-	// Add the message in the parsed body to the messages in the session
-	history = append(history, message)
+	// // Make sure the message is unique in history
+	// for _, m := range history {
+	// 	if strings.EqualFold(m, message) {
+	// 		return "", fmt.Errorf("You've already ordered %s before!", message)
+	// 	}
+	// }
 
-	// Form a sentence out of the history in the form Message 1, Message 2, and Message 3
-	l := len(history)
-	wordsForSentence := make([]string, l)
-	copy(wordsForSentence, history)
-	if l > 1 {
-		wordsForSentence[l-1] = "and " + wordsForSentence[l-1]
-	}
-	sentence := strings.Join(wordsForSentence, ", ")
+	// // Add the message in the parsed body to the messages in the session
+	// history = append(history, message)
 
-	// Save the updated history to the session
-	session["history"] = history
+	// // Form a sentence out of the history in the form Message 1, Message 2, and Message 3
+	// l := len(history)
+	// wordsForSentence := make([]string, l)
+	// copy(wordsForSentence, history)
+	// if l > 1 {
+	// 	wordsForSentence[l-1] = "and " + wordsForSentence[l-1]
+	// }
+	// sentence := strings.Join(wordsForSentence, ", ")
 
-	return fmt.Sprintf("So, you want %s! What else?", strings.ToLower(sentence)), nil
+	// //Save the updated history to the session
+	// session["history"] = history
+
+	// return fmt.Sprintf("So, you want %s! What else?", strings.ToLower(sentence)), nil
 }
 
 // withLog Wraps HandlerFuncs to log requests to Stdout
@@ -83,7 +87,7 @@ func withLog(fn http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		c := httptest.NewRecorder()
 		fn(c, r)
-		log.Printf("[%d] %-4s %s %s\n", c.Code, r.Method, r.URL.Path, c.Body)
+		log.Printf("[%d] %-4s %s \n", c.Code, r.Method, r.URL.Path)
 
 		for k, v := range c.HeaderMap {
 			w.Header()[k] = v
@@ -115,30 +119,9 @@ func handleWelcome(w http.ResponseWriter, r *http.Request) {
 	sessions[uuid] = Session{}
 
 	//starting to connect to Spotify
-	if spotifyAuthorizationToken == "" {
+	if SpotifyAuthorizationToken == "" {
 		log.Print("No spotify authorization token.. started to get one")
-		//create a headers map
-		url := "https://accounts.spotify.com/api/token"
-		var jsonStr = []byte(`grant_type=client_credentials`)
-		req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		req.Header.Set("Authorization", "Basic ZDc0NzRjMTg0OGU0NDFmM2FiOTAyMGQyNzM2OTE2ZGE6Y2M4NTU3YTE0ZmFkNDNiNTliMDI4MDc5YmE3ZTM2Yjc=")
-
-		client := &http.Client{}
-		resp, err := client.Do(req)
-		if err != nil {
-			panic(err)
-		}
-		defer resp.Body.Close()
-
-		//fmt.Println("response Status:", resp.Status)
-		//fmt.Println("response Headers:", resp.Header)
-		body, _ := ioutil.ReadAll(resp.Body)
-		//converting body to json
-		bodyJson := JSON{}
-		err = json.NewDecoder(bytes.NewBuffer(body)).Decode(&bodyJson)
-		spotifyAuthorizationToken, _ = bodyJson["access_token"].(string)
-		fmt.Println("spotify access token:", spotifyAuthorizationToken)
+		SpotifyAuthorizationToken = AuthorizeSpotify()
 	}
 
 	// Write a JSON containg the welcome message and the generated UUID
@@ -220,28 +203,4 @@ func Engage(addr string) error {
 
 	// Start the server
 	return http.ListenAndServe(addr, cors.CORS(mux))
-}
-
-func SendPostRequest(url string, body string) (string, string) {
-	fmt.Println("Sending post request to", url)
-
-	// var jsonStr = []byte(`{"title":"Buy cheese and bread for breakfast."}`)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(body)))
-
-	//req.Header.Set("X-Custom-Header", "myvalue")
-	// req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-
-	fmt.Println("response Status:", resp.Status)
-	fmt.Println("response Headers:", resp.Header)
-	respBody, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println("response Body:", string(respBody))
-
-	return string(respBody), string(resp.Status)
 }
