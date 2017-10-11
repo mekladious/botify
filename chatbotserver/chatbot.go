@@ -13,6 +13,7 @@ import (
 	"time"
 
 	cors "github.com/heppu/simple-cors"
+	"github.com/mekladious/botify/machineLearining"
 )
 
 var (
@@ -45,6 +46,11 @@ func sampleProcessor(session Session, message string) (string, error) {
 	if strings.Contains(strings.ToLower(message), "featured playlists") {
 		featuredPlaylists := Get_featured_playlists()
 		return featuredPlaylists, nil
+	} else {
+		result := machineLearining.UnknownAnswer(message)
+		if result != "" {
+			return result, nil
+		}
 	}
 	return "Sorry I didn't understand you .. For now you can get featured playlists.. more features coming soon", nil
 
@@ -148,8 +154,8 @@ func handleChat(w http.ResponseWriter, r *http.Request) {
 	// Make sure a session exists for the extracted UUID
 	session, sessionFound := sessions[uuid]
 	if !sessionFound {
-		http.Error(w, fmt.Sprintf("No session found for: %v.", uuid), http.StatusUnauthorized)
-		return
+		//http.Error(w, fmt.Sprintf("No session found for: %v.", uuid), http.StatusUnauthorized)
+		//return
 	}
 
 	// Parse the JSON string in the body of the request
