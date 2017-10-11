@@ -46,7 +46,7 @@ func sampleProcessor(session Session, message string) (string, error) {
 		featuredPlaylists := Get_featured_playlists()
 		return featuredPlaylists, nil
 	}
-	return "", nil
+	return "Sorry I didn't understand you .. For now you can get featured playlists.. more features coming soon", nil
 
 	// // Make sure a history key is defined in the session which points to a slice of strings
 	// _, historyFound := session["history"]
