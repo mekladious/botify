@@ -7,6 +7,9 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
+
+	"github.com/Jeffail/gabs"
 )
 
 // AuthorizeSpotify is a function to authorizing with spotify
@@ -41,6 +44,29 @@ func Get_featured_playlists() string {
 	// bodyJSON := JSON{}
 	// err := json.NewDecoder(bytes.NewBuffer(body)).Decode(&bodyJSON)
 	return string(body)
+}
+
+func Get_artist_tracks(singerName string) string {
+	artist_id := Get_artist_id(singerName)
+
+	body, _ := sendGetRequest("v1/artists/"+artist_id+"/top-tracks?country=US", "")
+	jsonParsed, _ := gabs.ParseJSON(body)
+
+	tracks := jsonParsed.Path("tracks.preview_url")
+
+	return tracks.String()
+}
+
+func Get_artist_id(singerName string) string {
+	//replacing spaces with %20
+	strings.Replace("", singerName, singerName, -1)
+	body, _ := sendGetRequest("v1/search?type=artist&q="+singerName+"&limit=1", "")
+
+	jsonParsed, _ := gabs.ParseJSON(body)
+
+	ids := jsonParsed.Path("artists.items.id")
+
+	return strings.TrimLeft(strings.TrimRight(ids.String(), "\"]"), "[\"")
 }
 
 func sendGetRequest(url string, body string) ([]byte, string) {
