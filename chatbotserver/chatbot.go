@@ -40,11 +40,11 @@ func sampleProcessor(session Session, message string) (string, error) {
 			return result, nil
 		}
 	}
-	if strings.Contains(strings.ToLower(message), "new") && strings.Contains(strings.ToLower(message), "new") {
+	if strings.Contains(strings.ToLower(message), "new") && strings.Contains(strings.ToLower(message), "release") {
 		newReleases := get_new_releases()
 		return newReleases, nil
 	}
-	return "Sorry I didn't understand you .. For now you can get featured playlists.. more features coming soon", nil
+	return "Sorry I didn't understand you .. For now you can get featured playlists and new releases.. more features coming soon", nil
 
 	// // Make sure a history key is defined in the session which points to a slice of strings
 	// _, historyFound := session["history"]
