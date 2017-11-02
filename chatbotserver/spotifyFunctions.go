@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 )
 
@@ -51,6 +52,10 @@ func sendGetRequest(url string, body string) ([]byte, string) {
 	defer func() {
 		fmt.Println("Recovered from get request error: ", recover())
 	}()
+	if SpotifyAuthorizationToken == "" {
+		log.Print("No spotify authorization token.. started to get one")
+		SpotifyAuthorizationToken = AuthorizeSpotify()
+	}
 
 	fmt.Println("Sending get request to", "https://api.spotify.com/"+url)
 
