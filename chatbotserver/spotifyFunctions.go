@@ -42,6 +42,11 @@ func Get_featured_playlists() string {
 	return string(body)
 }
 
+func get_new_releases() string {
+	body, _ := sendGetRequest("v1/browse/new-releases", "")
+	return string(body)
+}
+
 func sendGetRequest(url string, body string) ([]byte, string) {
 	defer func() {
 		fmt.Println("Recovered from get request error: ", recover())

@@ -3,31 +3,31 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "c3uS0kTaoK/1E5wrJXpZzZWGEGY=",
+			"checksumSHA1": "66FySld60ai7A8X83tqwih+Iguc=",
 			"path": "github.com/heppu/simple-cors",
 			"revision": "543cdec07e0c196abd48c5d966c0a0684cc47308",
 			"revisionTime": "2017-03-13T07:41:01Z"
 		},
 		{
-			"checksumSHA1": "vIKXyNJv+WZir0MrYoUVchKd8IY=",
+			"checksumSHA1": "0cdNscA7+z4+lKF5usZYz3it/04=",
 			"path": "github.com/joho/godotenv",
-			"revision": "a79fa1e548e2c689c241d10173efd51e5d689d5b",
-			"revisionTime": "2017-09-18T06:32:59Z"
+			"revision": "0f92a24bb0cd655270e0a559fbda13f92629510b",
+			"revisionTime": "2017-11-02T02:11:18Z"
 		},
 		{
-			"checksumSHA1": "6ZVvq9gdocZXtsQpVPcQWWmZIf8=",
+			"checksumSHA1": "UE4lhbPYYWEhqHXQk24OA73m5+8=",
 			"path": "github.com/joho/godotenv/autoload",
-			"revision": "a79fa1e548e2c689c241d10173efd51e5d689d5b",
-			"revisionTime": "2017-09-18T06:32:59Z"
+			"revision": "0f92a24bb0cd655270e0a559fbda13f92629510b",
+			"revisionTime": "2017-11-02T02:11:18Z"
 		},
 		{
-			"checksumSHA1": "Q75Pk8aeqLi8C8ozUGSbe7dG4cM=",
+			"checksumSHA1": "WN5oI5crfb+0khd0mSLXVjt0Y5c=",
 			"path": "github.com/mekladious/botify",
-			"revision": "cda10438b39ac2b100d95cd040529535895b1ed9",
-			"revisionTime": "2017-10-07T20:02:07Z"
+			"revision": "bef1576f075b6f6c9aa3a81a3a5efc40d2fb9a9f",
+			"revisionTime": "2017-10-11T18:08:49Z"
 		},
 		{
-			"checksumSHA1": "eZ3SSR0K8efAV5NICZOJbgD0ujA=",
+			"checksumSHA1": "klQ0wW7q4yvBuZ7Q36LTTRfwzFk=",
 			"path": "github.com/ramin0/chatbot",
 			"revision": "c9bb79785b0225cdb629db50037d11361d8c0bed",
 			"revisionTime": "2017-09-22T23:21:59Z"
