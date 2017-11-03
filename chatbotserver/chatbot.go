@@ -6,7 +6,7 @@ import (
 
 var (
 	// WelcomeMessage A constant to hold the welcome message
-	WelcomeMessage = "Welcome, what do you want to order?"
+	WelcomeMessage = "Hello, Botify is ready to inspire you ;)"
 
 	// sessions = {
 	//   "uuid1" = Session{...},
