@@ -7,6 +7,16 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
+)
+
+type (
+	Favorite struct {
+		ID        bson.ObjectId `bson:"_id,omitempty"`
+		uuid      string
+		trackid     string
+	}
 )
 
 // AuthorizeSpotify is a function to authorizing with spotify
@@ -41,6 +51,17 @@ func Get_featured_playlists() string {
 	// bodyJSON := JSON{}
 	// err := json.NewDecoder(bytes.NewBuffer(body)).Decode(&bodyJSON)
 	return string(body)
+}
+
+func add_to_favorites(uuid string, trackid string) string{
+	db, err := mgo.Dial(db_uri)
+	collection := db.DB("botify").C("Favorites")
+	err = collection.Insert(&Favorite{uuid:uuid, trackid:trackid})
+	if err!= nil{
+		return "error"
+	} else{
+		return "success"
+	}
 }
 
 func sendGetRequest(url string, body string) ([]byte, string) {

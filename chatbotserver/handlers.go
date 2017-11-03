@@ -80,8 +80,8 @@ func handleChat(w http.ResponseWriter, r *http.Request) {
 	// Make sure a session exists for the extracted UUID
 	session, sessionFound := sessions[uuid]
 	if !sessionFound {
-		//http.Error(w, fmt.Sprintf("No session found for: %v.", uuid), http.StatusUnauthorized)
-		//return
+		http.Error(w, fmt.Sprintf("No session found for: %v.", uuid), http.StatusUnauthorized)
+		return
 	}
 
 	// Parse the JSON string in the body of the request
@@ -100,7 +100,7 @@ func handleChat(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Process the received message
-	message, err := processor(session, data["message"].(string))
+	message, err := processor(session, uuid, data["message"].(string))
 	if err != nil {
 		http.Error(w, err.Error(), 422 /* http.StatusUnprocessableEntity */)
 		return
