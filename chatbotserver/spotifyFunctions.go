@@ -10,6 +10,16 @@ import (
 	"strings"
 
 	"github.com/Jeffail/gabs"
+	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
+)
+
+type (
+	Favorite struct {
+		ID        bson.ObjectId `bson:"_id,omitempty"`
+		uuid      string
+		trackid     string
+	}
 )
 
 // AuthorizeSpotify is a function to authorizing with spotify
@@ -256,6 +266,17 @@ func search(keyword string) string {
 	result = append(result, track...)
 
 	return string(result)
+}
+
+func add_to_favorites(uuid string, trackid string) string{
+	db, err := mgo.Dial(db_uri)
+	collection := db.DB("botify").C("Favorites")
+	err = collection.Insert(&Favorite{uuid:uuid, trackid:trackid})
+	if err!= nil{
+		return "error"
+	} else{
+		return "success"
+	}
 }
 
 func sendGetRequest(url string, body string) ([]byte, string) {
