@@ -40,13 +40,13 @@ func sampleProcessor(session Session, uuid string, message string) (string, erro
 			return result, nil
 		}
 	}
-	// if strings.Contains(strings.ToLower(message), "favorite") {
-	// 	if strings.Contains(strings.ToLower(message), "add"){
-	// 		// trackId := 
-	// 		res := add_to_favorites(sessions.indexOf(Session), "sdwed")
-	// 		return res, nil
-	// 	}
-	// }
+	if strings.Contains(strings.ToLower(message), "favorite") {
+		if strings.Contains(strings.ToLower(message), "add"){
+			trackId := "7c0XG5cIJTrrAgEC3ULPiq" //dummy data
+			res := add_to_favorites(uuid, trackId)
+			return res, nil
+		}
+	}
 
 	return "Sorry I didn't understand you .. For now you can get featured playlists.. more features coming soon", nil
 
