@@ -42,8 +42,9 @@ func sampleProcessor(session Session, message string) (string, error) {
 		}
 	}
 
-	if strings.Contains(strings.ToLower(message), "search") {
+	if strings.Contains(strings.ToLower(message), "search") || strings.Contains(strings.ToLower(message), "play") {
 		message = strings.Replace(message, "search", "", -1)
+		message = strings.Replace(message, "play", "", -1)
 		message = strings.Replace(message, " ", "+", -1)
 		reg, _ := regexp.Compile("[^a-zA-Z0-9]+")
 		message = reg.ReplaceAllString(message, "")
