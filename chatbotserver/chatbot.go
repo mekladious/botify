@@ -30,7 +30,7 @@ type (
 	Processor func(session Session, message string) (string, error)
 )
 
-func sampleProcessor(session Session, uuid string, message string) (string, error) {
+func sampleProcessor(session Session, uuid string, message string) (string, JSON, error) {
 	if strings.Contains(strings.ToLower(message), "featured playlists") {
 		featuredPlaylists := Get_featured_playlists()
 		return featuredPlaylists, nil
@@ -43,8 +43,11 @@ func sampleProcessor(session Session, uuid string, message string) (string, erro
 	if strings.Contains(strings.ToLower(message), "favorite") {
 		if strings.Contains(strings.ToLower(message), "add"){
 			trackId := "7c0XG5cIJTrrAgEC3ULPiq" //dummy data
-			res := add_to_favorites(uuid, trackId)
-			return res, nil
+			res,err := add_to_favorites(uuid, trackId)
+			return res, err
+		} else{
+			res, err := get_favorites(uuid)
+			return res, err
 		}
 	}
 

@@ -53,15 +53,27 @@ func Get_featured_playlists() string {
 	return string(body)
 }
 
-func add_to_favorites(uuid string, trackid string) string{
+func add_to_favorites(uuid string, trackid string) (string, error){
 	db, err := mgo.Dial(db_uri)
 	collection := db.DB("botify").C("Favorites")
 	err = collection.Insert(&Favorite{Uuid:uuid, Trackid:trackid})
 	if err!= nil{
-		return "error"
+		return "", err
 	} else{
-		return "success"
+		return "success", nil
 	}
+}
+
+func get_favorites(uuid string) (JSON, error){
+	db, err := mgo.Dial(db_uri)
+	collection := db.DB("botify").C("Favorites")
+	
+	var results []Favorite
+	collection.Find(bson.M{"uuid": uuid}).All(&results)
+	// collection.Find(nil).All(&results)
+
+	res := JSON{"Favorites":results}
+	return res, err
 }
 
 func sendGetRequest(url string, body string) ([]byte, string) {
