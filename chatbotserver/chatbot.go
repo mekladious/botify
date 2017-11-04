@@ -133,8 +133,11 @@ func sampleProcessor(session Session, message string, uuid string) (string, erro
 	if strings.Contains(strings.ToLower(message), "favorite") {
 		if strings.Contains(strings.ToLower(message), "add"){
 			trackId := "7c0XG5cIJTrrAgEC3ULPiq" //dummy data
-			res := add_to_favorites(uuid, trackId)
-			return res, nil
+			res,err := add_to_favorites(uuid, trackId)
+			return res, err
+		} else{
+			res, err := get_favorites(uuid)
+			return res, err
 		}
 	}
 
