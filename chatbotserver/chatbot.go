@@ -2,6 +2,7 @@ package chatbot
 
 import (
 	"strings"
+	"regexp"
 )
 
 var (
@@ -41,17 +42,28 @@ func sampleProcessor(session Session, message string) (string, error) {
 		}
 	}
 
+	if strings.Contains(strings.ToLower(message), "search") {
+		message = strings.Replace(message, "search", "", -1)
+		message = strings.Replace(message, " ", "+", -1)
+		reg, _ := regexp.Compile("[^a-zA-Z0-9]+")
+		message = reg.ReplaceAllString(message, "")
+
+		results := search(message)
+
+		if results != "null" {
+			return results, nil
+		} else{
+			return "No results were found for your search, please try again", nil
+		}
+
+	}
+	
 	if strings.Contains(strings.ToLower(message), "new") && strings.Contains(strings.ToLower(message), "release") {
 		newReleases := get_new_releases()
 		return newReleases, nil
 	}
 
-	results := search(message)
-	if len(results)>0 {
-		return results, nil
-	} else{
-		return "Sorry I didn't understand you .. For now you can get featured playlists and new releases.. more features coming soon", nil
-	}
+	return "Sorry I didn't understand you .. For now you can get featured playlists and new releases.. more features coming soon", nil
 	
 	// // Make sure a history key is defined in the session which points to a slice of strings
 	// _, historyFound := session["history"]
