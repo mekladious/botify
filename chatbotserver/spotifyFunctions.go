@@ -16,9 +16,9 @@ import (
 
 type (
 	Favorite struct {
-		ID        bson.ObjectId `bson:"_id,omitempty"`
-		uuid      string
-		trackid     string
+		ID			bson.ObjectId `bson:"_id,omitempty"`
+		Uuid		string `bson:"uuid"`
+		Trackid		string `bson:"trackid"`
 	}
 )
 
@@ -271,7 +271,7 @@ func search(keyword string) string {
 func add_to_favorites(uuid string, trackid string) string{
 	db, err := mgo.Dial(db_uri)
 	collection := db.DB("botify").C("Favorites")
-	err = collection.Insert(&Favorite{uuid:uuid, trackid:trackid})
+	err = collection.Insert(&Favorite{Uuid:uuid, Trackid:trackid})
 	if err!= nil{
 		return "error"
 	} else{
