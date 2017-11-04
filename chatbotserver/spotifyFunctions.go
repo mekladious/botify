@@ -48,6 +48,19 @@ func get_new_releases() string {
 	return string(body)
 }
 
+func search(keyword string) string {
+	artist, _ := sendGetRequest("v1/search?q="+keyword+"&type=artist", "")
+	playlist, _ := sendGetRequest("v1/search?q="+keyword+"&type=playlist", "")
+	album, _ := sendGetRequest("v1/search?q="+keyword+"&type=album", "")
+	track, _ := sendGetRequest("v1/search?q="+keyword+"&type=track", "")
+
+	result := append(artist,playlist...)
+	result = append(result, album...)
+	result = append(result, track...)
+
+	return string(result)
+}
+
 func sendGetRequest(url string, body string) ([]byte, string) {
 	defer func() {
 		fmt.Println("Recovered from get request error: ", recover())
