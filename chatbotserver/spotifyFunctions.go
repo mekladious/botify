@@ -43,6 +43,11 @@ func Get_featured_playlists() string {
 	return string(body)
 }
 
+func get_new_releases() string {
+	body, _ := sendGetRequest("v1/browse/new-releases", "")
+	return string(body)
+}
+
 func search(keyword string) string {
 	artist, _ := sendGetRequest("v1/search?q="+keyword+"&type=artist", "")
 	playlist, _ := sendGetRequest("v1/search?q="+keyword+"&type=playlist", "")
