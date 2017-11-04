@@ -40,8 +40,12 @@ func sampleProcessor(session Session, message string) (string, error) {
 			return result, nil
 		}
 	}
-	return "Sorry I didn't understand you .. For now you can get featured playlists.. more features coming soon", nil
-
+	results := search(message)
+	if len(results)>0 {
+		return results, nil
+	} else{
+		return "Sorry I didn't understand you .. For now you can get featured playlists and new releases.. more features coming soon", nil
+	}
 	// // Make sure a history key is defined in the session which points to a slice of strings
 	// _, historyFound := session["history"]
 	// if !historyFound {
