@@ -48,8 +48,8 @@ func sampleProcessor(session Session, message string, uuid string) (string, erro
 		tracks := Get_artist_tracks(singerName)
 		err := InsertAlarmInGoogleCalendar(alarmTime, uuid, tracks)
 		reply := "Done, Alarm is set. " + singerName + " will wake you up at " + alarmTime + "."
-		if err != nil {
-			reply := err
+		if err != "" {
+			reply = err
 		}
 
 		return reply, nil
