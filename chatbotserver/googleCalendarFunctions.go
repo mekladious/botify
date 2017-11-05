@@ -21,15 +21,23 @@ import (
 var srv *calendar.Service
 
 //InsertAlarmInGoogleCalendar takes time in format hh:mm AM and user uuid and tracks to be played when alarm is on
-func InsertAlarmInGoogleCalendar(alarmTime string, uuid string, tracks string) {
+func InsertAlarmInGoogleCalendar(alarmTime string, uuid string, tracks string) string {
 	connectGoogleCalendar()
 	now := time.Now()
 
 	hour := now.Hour()
 	minute := now.Minute()
 
-	InputHour, _ := strconv.Atoi(between(alarmTime, " ", ":"))
-	InputMinute, _ := strconv.Atoi(after(alarmTime, ":"))
+	InputHour, err := strconv.Atoi(between(alarmTime, " ", ":"))
+	if err != nil {
+		log.Fatalf("Unable to create alarm. %v \n", err)
+		return "Unable to create alarm."
+	}
+	InputMinute, err := strconv.Atoi(after(alarmTime, ":"))
+	if err != nil {
+		log.Fatalf("Unable to create alarm. %v \n", err)
+		return "Unable to create alarm."
+	}
 	// fmt.Println("input hour", before(alarmTime, ":"))
 	// fmt.Println("input hour", InputHour)
 	// fmt.Println("now hour", hour)
@@ -60,10 +68,13 @@ func InsertAlarmInGoogleCalendar(alarmTime string, uuid string, tracks string) {
 	}
 
 	//inserting alarm
-	_, err := srv.Events.Insert("primary", alarm).Do()
+	_, err = srv.Events.Insert("primary", alarm).Do()
 	if err != nil {
 		log.Fatalf("Unable to create alarm. %v \n", err)
+		return "Unable to create alarm."
 	}
+
+	return ""
 }
 
 // GetNext10Events gets next 10 events from calendar .. this is a quick start guide function from google

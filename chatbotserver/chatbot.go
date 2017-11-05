@@ -46,11 +46,13 @@ func sampleProcessor(session Session, message string, uuid string) (string, erro
 			return "please use the format 'i want (artist name) to alarm me at (time hh:mm)'", nil
 		}
 		tracks := Get_artist_tracks(singerName)
-		InsertAlarmInGoogleCalendar(alarmTime, uuid, tracks)
-		return tracks, nil
-	} else if strings.Contains(message, "google") {
-		GetNext10Events()
-		return "done", nil
+		err := InsertAlarmInGoogleCalendar(alarmTime, uuid, tracks)
+		reply := "Done, Alarm is set. " + singerName + " will wake you up at " + alarmTime + "."
+		if err != nil {
+			reply := err
+		}
+
+		return reply, nil
 	} else if strings.Contains(message, "i am") || strings.Contains(message, "i feel") {
 		mood := after(message, "i")
 		if strings.Contains(mood, "happy") || strings.Contains(mood, "excite") || strings.Contains(mood, "cheerful") {
