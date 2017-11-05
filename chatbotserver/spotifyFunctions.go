@@ -46,6 +46,7 @@ func Get_featured_playlists() string {
 	return string(body)
 }
 
+
 func Get_artist_tracks(singerName string) string {
 	singerName = strings.Replace(singerName, " ", "%20", -1) // replacing spaces by %20 as required by spotify api
 	artist_id := Get_artist_id(singerName)
@@ -68,6 +69,24 @@ func Get_artist_id(singerName string) string {
 	ids := jsonParsed.Path("artists.items.id")
 
 	return strings.TrimLeft(strings.TrimRight(ids.String(), "\"]"), "[\"")
+}
+
+func get_new_releases() string {
+	body, _ := sendGetRequest("v1/browse/new-releases", "")
+	return string(body)
+}
+
+func search(keyword string) string {
+	artist, _ := sendGetRequest("v1/search?q="+keyword+"&type=artist", "")
+	playlist, _ := sendGetRequest("v1/search?q="+keyword+"&type=playlist", "")
+	album, _ := sendGetRequest("v1/search?q="+keyword+"&type=album", "")
+	track, _ := sendGetRequest("v1/search?q="+keyword+"&type=track", "")
+
+	result := append(artist,playlist...)
+	result = append(result, album...)
+	result = append(result, track...)
+
+	return string(result)
 }
 
 func sendGetRequest(url string, body string) ([]byte, string) {
