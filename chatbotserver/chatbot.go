@@ -1,8 +1,8 @@
 package chatbot
 
 import (
-	"strings"
 	"regexp"
+	"strings"
 )
 
 var (
@@ -69,19 +69,27 @@ func sampleProcessor(session Session, message string, uuid string) (string, erro
 
 		if results != "null" {
 			return results, nil
-		} else{
+		} else {
 			return "No results were found for your search, please try again", nil
 		}
 
 	}
-	
+
 	if strings.Contains(strings.ToLower(message), "new") && strings.Contains(strings.ToLower(message), "release") {
 		newReleases := get_new_releases()
 		return newReleases, nil
 	}
 
+	if strings.Contains(message, "i am") {
+		mood := after(message, "am")
+		if strings.Contains(mood, "happy") || strings.Contains(mood, "excited") || strings.Contains(mood, "cheerful") {
+			Moody := Get_mood("party")
+			return Moody, nil
+		}
+	}
+
 	return "Sorry I didn't understand you .. For now you can get featured playlists and new releases.. more features coming soon", nil
-	
+
 	// // Make sure a history key is defined in the session which points to a slice of strings
 	// _, historyFound := session["history"]
 	// if !historyFound {

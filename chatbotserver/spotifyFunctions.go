@@ -46,7 +46,6 @@ func Get_featured_playlists() string {
 	return string(body)
 }
 
-
 func Get_artist_tracks(singerName string) string {
 	singerName = strings.Replace(singerName, " ", "%20", -1) // replacing spaces by %20 as required by spotify api
 	artist_id := Get_artist_id(singerName)
@@ -76,13 +75,24 @@ func get_new_releases() string {
 	return string(body)
 }
 
+func Get_mood(mood string) string {
+	body, _ := sendGetRequest("v1/browse/categories/"+mood+"/playlists", "")
+	jsonParsed, _ := gabs.ParseJSON(body)
+
+	//names := jsonParsed.Path("items.name")
+	hrefs := jsonParsed.Path("items.owner.external_urls.spotify").String()
+	fmt.Println(hrefs)
+	return hrefs
+	//playlist := Get_playlist_tracks()
+}
+
 func search(keyword string) string {
 	artist, _ := sendGetRequest("v1/search?q="+keyword+"&type=artist", "")
 	playlist, _ := sendGetRequest("v1/search?q="+keyword+"&type=playlist", "")
 	album, _ := sendGetRequest("v1/search?q="+keyword+"&type=album", "")
 	track, _ := sendGetRequest("v1/search?q="+keyword+"&type=track", "")
 
-	result := append(artist,playlist...)
+	result := append(artist, playlist...)
 	result = append(result, album...)
 	result = append(result, track...)
 
