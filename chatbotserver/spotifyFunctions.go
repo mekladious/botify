@@ -46,7 +46,7 @@ func Get_featured_playlists() string {
 	jsonParsed, _ := gabs.ParseJSON(body)
 
 	names := jsonParsed.Path("playlists.items.name")
-	hrefs := jsonParsed.Path("playlists.items.owner.external_urls.spotify")
+	hrefs := jsonParsed.Path("playlists.items.external_urls.spotify")
 
 	s1 := ""
 	children, _ := names.Children()
@@ -72,7 +72,7 @@ func Get_featured_playlists() string {
 	//x := len(s4)
 	sFinal := ""
 	for i := 0; i < x-1; i++ {
-		sFinal = sFinal + s2[i] + " : " + s4[i] + "\n"
+		sFinal = sFinal + s2[i] + " : " + s4[i] + " \n"
 	}
 
 	fmt.Println(sFinal)
@@ -189,7 +189,7 @@ func get_new_releases() string {
 	//x := len(s4)
 	sFinal := ""
 	for i := 0; i < x-1; i++ {
-		sFinal = sFinal + s2[i] + " : " + s4[i] + "\n"
+		sFinal = sFinal + s2[i] + " : " + s4[i] + " \n"
 	}
 
 	fmt.Println(sFinal)
@@ -202,7 +202,7 @@ func Get_mood(mood string) string {
 	jsonParsed, _ := gabs.ParseJSON(body)
 
 	names := jsonParsed.Path("playlists.items.name")
-	hrefs := jsonParsed.Path("playlists.items.owner.external_urls.spotify")
+	hrefs := jsonParsed.Path("playlists.items.external_urls.spotify")
 
 	s1 := ""
 	children, _ := names.Children()
@@ -228,7 +228,7 @@ func Get_mood(mood string) string {
 	//x := len(s4)
 	sFinal := ""
 	for i := 0; i < x-1; i++ {
-		sFinal = sFinal + s2[i] + " : " + s4[i] + "\n"
+		sFinal = sFinal + s2[i] + " : " + s4[i] + " \n"
 	}
 
 	fmt.Println(sFinal)
