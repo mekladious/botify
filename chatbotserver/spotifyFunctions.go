@@ -92,6 +92,60 @@ func Get_artist_tracks(singerName string) string {
 	return tracks.String()
 }
 
+func Get_artist_info(singerName string) string {
+	singerName = strings.Replace(singerName, " ", "%20", -1) // replacing spaces by %20 as required by spotify api
+	artist_id := Get_artist_id(singerName)
+
+	body, _ := sendGetRequest("v1/artists/"+artist_id, "")
+	jsonParsed, _ := gabs.ParseJSON(body)
+	//name := ""
+	//followers := 0
+	//test := jsonParsed.Path(name)
+
+	name := jsonParsed.Path("name").Data().(string)
+	followers := jsonParsed.Path("followers.total").Data().(float64)
+	z := int(followers)
+	f := fmt.Sprint(z)
+	genres := jsonParsed.Path("genres")
+	s1 := ""
+	children, _ := genres.Children()
+	for _, child := range children {
+		s1 = s1 + child.Data().(string)
+		s1 = s1 + ","
+
+	}
+	s2 := strings.Split(s1, ",")
+	y := len(s2)
+	s5 := ""
+	for i := 0; i < y-1; i++ {
+		s5 = s5 + s2[i] + " , "
+	}
+
+	images := jsonParsed.Path("images.url")
+	s3 := ""
+	children1, _ := images.Children()
+	for _, child := range children1 {
+		s3 = s3 + child.Data().(string)
+		s3 = s3 + ","
+
+	}
+	s4 := strings.Split(s3, ",")
+	x := len(s4)
+	s6 := ""
+	for i := 0; i < x-1; i++ {
+		s6 = s6 + s4[i] + " , "
+	}
+	sFinal := ""
+	sFinal += name + "\n" +
+		"has " + f + " followers\n" +
+		"specializes in " + s5 + ".\n" +
+		"Pictures: " + s6
+	fmt.Println(sFinal)
+
+	return sFinal
+	//return string(body)
+}
+
 func Get_artist_id(singerName string) string {
 	//replacing spaces with %20
 	strings.Replace("", singerName, singerName, -1)
