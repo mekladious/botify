@@ -67,7 +67,7 @@ func sampleProcessor(session Session, message string, uuid string) (string, erro
 			Moody := Get_mood("mood")
 			return Moody, nil
 		}
-		if strings.Contains(mood, "angry") || strings.Contains(mood, "furious") || strings.Contains(mood, "annoyed") {
+		if strings.Contains(mood, "angry") || strings.Contains(mood, "furious") || strings.Contains(mood, "annoyed") || strings.Contains(mood, "sad") {
 			Moody := Get_mood("rock")
 			return Moody, nil
 		}
