@@ -33,6 +33,29 @@
 			"revisionTime": "2017-09-22T23:21:59Z"
 		},
 		{
+			"checksumSHA1": "GtamqiJoL7PGHsN454AoffBFMa8=",
+			"path": "golang.org/x/net/context",
+			"revision": "ea0da6f35caf3ff91581c800469e22eef75076f4",
+			"revisionTime": "2017-11-01T22:18:28Z"
+		},
+		{
+			"checksumSHA1": "3ckEphtOxMi2dry1yA83VGfQ0fk=",
+			"path": "golang.org/x/oauth2",
+			"revision": "bb50c06baba3d0c76f9d125c0719093e315b5b44",
+			"revisionTime": "2017-09-28T00:25:42Z"
+		},
+		{
+			"checksumSHA1": "HIozMHM3ngSaCZi3kzIgdPxy/qw=",
+			"path": "golang.org/x/oauth2/google",
+			"revision": "bb50c06baba3d0c76f9d125c0719093e315b5b44",
+			"revisionTime": "2017-09-28T00:25:42Z"
+		},
+		{
+			"checksumSHA1": "+V/ePGrk50OhHg/8d5uNPO6Vj8I=",
+			"path": "google.golang.org/api/calendar/v3",
+			"revision": "8c7cbce8616dff98a4442737eaa00096f04d7905",
+			"revisionTime": "2017-11-02T00:03:34Z"
+
 			"checksumSHA1": "1D8GzeoFGUs5FZOoyC2DpQg8c5Y=",
 			"path": "gopkg.in/mgo.v2",
 			"revision": "3f83fa5005286a7fe593b055f0d7771a7dce4655",

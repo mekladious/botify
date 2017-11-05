@@ -31,10 +31,26 @@ type (
 	Processor func(session Session, message string) (string, error)
 )
 
-func sampleProcessor(session Session, message string) (string, error) {
-	if strings.Contains(strings.ToLower(message), "featured playlists") {
+func sampleProcessor(session Session, message string, uuid string) (string, error) {
+	message = strings.ToLower(message)
+	if strings.Contains(message, "featured playlists") {
 		featuredPlaylists := Get_featured_playlists()
 		return featuredPlaylists, nil
+	} else if strings.Contains(message, "alarm") {
+		//format : i want (artist name) to alarm me
+		//singerName := strings.TrimLeft(strings.TrimRight(message, "to"), "want")
+		//singerName := regexp.MustCompile("want (.*?) to").FindStringSubmatch(message) //works with single name
+		singerName := between(message, "want", "to")
+		alarmTime := after(message, "at")
+		if singerName == "" || alarmTime == "" {
+			return "please use the format 'i want (artist name) to alarm me at (time hh:mm)'", nil
+		}
+		tracks := Get_artist_tracks(singerName)
+		InsertAlarmInGoogleCalendar(alarmTime, uuid, tracks)
+		return tracks, nil
+	} else if strings.Contains(message, "google") {
+		GetNext10Events()
+		return "done", nil
 	} else {
 		result := checkForSymbols(UnknownAnswer(message))
 		if result != "" {
