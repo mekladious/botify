@@ -51,36 +51,7 @@ func sampleProcessor(session Session, message string, uuid string) (string, erro
 	} else if strings.Contains(message, "google") {
 		GetNext10Events()
 		return "done", nil
-	} else {
-		result := checkForSymbols(UnknownAnswer(message))
-		if result != "" {
-			return result, nil
-		}
-	}
-
-	if strings.Contains(strings.ToLower(message), "search") || strings.Contains(strings.ToLower(message), "play") {
-		message = strings.Replace(message, "search", "", -1)
-		message = strings.Replace(message, "play", "", -1)
-		message = strings.Replace(message, " ", "+", -1)
-		reg, _ := regexp.Compile("[^a-zA-Z0-9]+")
-		message = reg.ReplaceAllString(message, "")
-
-		results := search(message)
-
-		if results != "null" {
-			return results, nil
-		} else {
-			return "No results were found for your search, please try again", nil
-		}
-
-	}
-
-	if strings.Contains(strings.ToLower(message), "new") && strings.Contains(strings.ToLower(message), "release") {
-		newReleases := get_new_releases()
-		return newReleases, nil
-	}
-
-	if strings.Contains(message, "i am") || strings.Contains(message, "i feel") {
+	} else if strings.Contains(message, "i am") || strings.Contains(message, "i feel") {
 		mood := after(message, "i")
 		if strings.Contains(mood, "happy") || strings.Contains(mood, "excite") || strings.Contains(mood, "cheerful") {
 			Moody := Get_mood("party")
@@ -127,12 +98,35 @@ func sampleProcessor(session Session, message string, uuid string) (string, erro
 			return Moody, nil
 		}
 
-	}
-
-	if strings.Contains(message, "info of") {
+	} else if strings.Contains(message, "info of") {
 		artist := after(message, "info of")
 		info := Get_artist_info(artist)
 		return info, nil
+	} else if strings.Contains(strings.ToLower(message), "search") || strings.Contains(strings.ToLower(message), "play") {
+		message = strings.Replace(message, "search", "", -1)
+		message = strings.Replace(message, "play", "", -1)
+		message = strings.Replace(message, " ", "+", -1)
+		reg, _ := regexp.Compile("[^a-zA-Z0-9]+")
+		message = reg.ReplaceAllString(message, "")
+
+		results := search(message)
+
+		if results != "null" {
+			return results, nil
+		} else {
+			return "No results were found for your search, please try again", nil
+		}
+
+	}
+
+	if strings.Contains(strings.ToLower(message), "new") && strings.Contains(strings.ToLower(message), "release") {
+		newReleases := get_new_releases()
+		return newReleases, nil
+	} else {
+		result := checkForSymbols(UnknownAnswer(message))
+		if result != "" {
+			return result, nil
+		}
 	}
 
 	return "Sorry I didn't understand you .. For now you can get featured playlists and new releases.. more features coming soon", nil
