@@ -47,6 +47,7 @@ func Get_featured_playlists() string {
 }
 
 func Get_artist_tracks(singerName string) string {
+	singerName = strings.Replace(singerName, " ", "%20", -1) // replacing spaces by %20 as required by spotify api
 	artist_id := Get_artist_id(singerName)
 
 	body, _ := sendGetRequest("v1/artists/"+artist_id+"/top-tracks?country=US", "")

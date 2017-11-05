@@ -1,7 +1,6 @@
 package chatbot
 
 import (
-	"regexp"
 	"strings"
 )
 
@@ -31,7 +30,7 @@ type (
 	Processor func(session Session, message string) (string, error)
 )
 
-func sampleProcessor(session Session, message string) (string, error) {
+func sampleProcessor(session Session, message string, uuid string) (string, error) {
 	message = strings.ToLower(message)
 	if strings.Contains(message, "featured playlists") {
 		featuredPlaylists := Get_featured_playlists()
@@ -39,12 +38,18 @@ func sampleProcessor(session Session, message string) (string, error) {
 	} else if strings.Contains(message, "alarm") {
 		//format : i want (artist name) to alarm me
 		//singerName := strings.TrimLeft(strings.TrimRight(message, "to"), "want")
-		singerName := regexp.MustCompile("want (.*?) to").FindStringSubmatch(message)
-		if len(singerName) == 0 {
-			return "please use the format 'i want (artist name) to alarm me'", nil
+		//singerName := regexp.MustCompile("want (.*?) to").FindStringSubmatch(message) //works with single name
+		singerName := between(message, "want", "to")
+		alarmTime := after(message, "at")
+		if singerName == "" || alarmTime == "" {
+			return "please use the format 'i want (artist name) to alarm me at (time hh:mm)'", nil
 		}
-		tracks := Get_artist_tracks(singerName[1])
+		tracks := Get_artist_tracks(singerName)
+		InsertAlarmInGoogleCalendar(alarmTime, uuid, tracks)
 		return tracks, nil
+	} else if strings.Contains(message, "google") {
+		GetNext10Events()
+		return "done", nil
 	} else {
 		result := checkForSymbols(UnknownAnswer(message))
 		if result != "" {
