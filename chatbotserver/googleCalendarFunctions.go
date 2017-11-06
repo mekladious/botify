@@ -39,6 +39,13 @@ func InsertAlarmInGoogleCalendar(alarmTime string, uuid string, tracks string, s
 		log.Fatalf("Unable to create alarm. %v \n", err)
 		return "Unable to create alarm."
 	}
+
+	if InputHour > 23 {
+		return "Unable to create alarm hour must be less than 24"
+	}
+	if InputMinute > 59 {
+		return "Unable to create alarm minute must be less than 60"
+	}
 	// fmt.Println("input hour", before(alarmTime, ":"))
 	// fmt.Println("input hour", InputHour)
 	// fmt.Println("now hour", hour)
@@ -99,9 +106,15 @@ func GetAlarms(uuid string) string {
 			} else {
 				when = i.Start.Date
 			}
+			when = before(when, "+")
+			alarmTime, _ := time.Parse("2016-01-02T15:04:05", when)
 			summary := strings.Split(i.Summary, "|")
 			if summary[0] == uuid {
-				alarms += summary[1] + " at " + when + "\n"
+				day := strconv.Itoa(alarmTime.Day())
+				month := alarmTime.Month().String()
+				hour := strconv.Itoa(alarmTime.Hour())
+				minute := strconv.Itoa(alarmTime.Minute())
+				alarms += summary[1] + " on " + day + "/" + month + " at " + hour + ":" + minute + "\n"
 			}
 		}
 	} else {
