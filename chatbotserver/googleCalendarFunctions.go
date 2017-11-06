@@ -77,8 +77,8 @@ func InsertAlarmInGoogleCalendar(alarmTime string, uuid string, tracks string) s
 	return ""
 }
 
-// GetNext10Events gets next 10 events from calendar .. this is a quick start guide function from google
-func GetNext10Events() {
+// GetAlarms gets user next alarms from calendar
+func GetAlarms(uuid string) string {
 	connectGoogleCalendar()
 	t := time.Now().Format(time.RFC3339)
 	events, err := srv.Events.List("primary").ShowDeleted(false).
@@ -86,8 +86,8 @@ func GetNext10Events() {
 	if err != nil {
 		log.Fatalf("Unable to retrieve next ten of the user's events. %v", err)
 	}
-
-	fmt.Println("Upcoming events:")
+	alarms := ""
+	alarms += "Upcoming events: \n\n"
 	if len(events.Items) > 0 {
 		for _, i := range events.Items {
 			var when string
@@ -98,12 +98,14 @@ func GetNext10Events() {
 			} else {
 				when = i.Start.Date
 			}
-			fmt.Printf("%s (%s)\n", i.Summary, when)
+			if i.Summary == uuid {
+				alarms += when + "\n"
+			}
 		}
 	} else {
-		fmt.Printf("No upcoming events found.\n")
+		alarms = "No upcoming events found.\n"
 	}
-
+	return alarms
 }
 
 // getClient uses a Context and Config to retrieve a Token

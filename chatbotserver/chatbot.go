@@ -37,9 +37,10 @@ func sampleProcessor(session Session, message string, uuid string) (string, erro
 		featuredPlaylists := Get_featured_playlists()
 		return featuredPlaylists, nil
 	} else if strings.Contains(message, "alarm") {
-		//format : i want (artist name) to alarm me
-		//singerName := strings.TrimLeft(strings.TrimRight(message, "to"), "want")
-		//singerName := regexp.MustCompile("want (.*?) to").FindStringSubmatch(message) //works with single name
+		if strings.Contains(message, "show") {
+			alarms := GetAlarms(uuid)
+			return alarms, nil
+		}
 		singerName := between(message, "want", "to")
 		alarmTime := after(message, "at")
 		if singerName == "" || alarmTime == "" {
