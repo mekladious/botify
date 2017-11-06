@@ -124,6 +124,22 @@ func sampleProcessor(session Session, message string, uuid string) (string, erro
 	if strings.Contains(strings.ToLower(message), "new") && strings.Contains(strings.ToLower(message), "release") {
 		newReleases := get_new_releases()
 		return newReleases, nil
+	} else if strings.Contains(strings.ToLower(message), "favorite") {
+		if strings.Contains(strings.ToLower(message), "add") {
+			//trackId := "7c0XG5cIJTrrAgEC3ULPiq" //dummy data
+			trackName := after(message, ":")
+			trackid := getTrackID(trackName)
+			if trackid == "nil" {
+				return "track not found", nil
+			}
+			res, err := add_to_favorites(uuid, trackid, trackName)
+			return res, err
+		} else if strings.Contains(strings.ToLower(message), "show") {
+			res, err := get_favorites(uuid)
+			return res, err
+		} else {
+			return "supported functions: add, show", nil
+		}
 	} else {
 		result := checkForSymbols(UnknownAnswer(message))
 		if result != "" {

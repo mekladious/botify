@@ -7,9 +7,21 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/Jeffail/gabs"
+	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
+)
+
+type (
+	Favorite struct {
+		ID        bson.ObjectId `bson:"_id,omitempty"`
+		Uuid      string        `bson:"uuid"`
+		Trackid   string        `bson:"trackid"`
+		TrackName string        `bson:"trackName"`
+	}
 )
 
 // AuthorizeSpotify is a function to authorizing with spotify
@@ -256,6 +268,45 @@ func search(keyword string) string {
 	result = append(result, track...)
 
 	return string(result)
+}
+
+func getTrackID(trackName string) string {
+	trackName = strings.Replace(trackName, " ", "%20", -1)
+	body, _ := sendGetRequest("v1/search?q="+trackName+"&type=track&limit=1", "")
+	jsonParsed, _ := gabs.ParseJSON(body)
+	ids := jsonParsed.Path("tracks.items.id")
+	if strings.TrimLeft(strings.TrimRight(ids.String(), "\"]"), "[\"") == "{}" {
+		return "nil"
+	}
+	return strings.TrimLeft(strings.TrimRight(ids.String(), "\"]"), "[\"")
+}
+
+func add_to_favorites(uuid string, trackid string, trackName string) (string, error) {
+	db, err := mgo.Dial(db_uri)
+	collection := db.DB("botify").C("Favorites")
+	err = collection.Insert(&Favorite{Uuid: uuid, Trackid: trackid, TrackName: trackName})
+	if err != nil {
+		return "", err
+	} else {
+		return trackName + " successfully added to your favourites", nil
+	}
+}
+
+func get_favorites(uuid string) (string, error) {
+	db, err := mgo.Dial(db_uri)
+	collection := db.DB("botify").C("Favorites")
+
+	var results []Favorite
+	collection.Find(bson.M{"uuid": uuid}).All(&results)
+	// collection.Find(nil).All(&results)
+	res := ""
+	for i := 0; i < len(results); i++ {
+		r := results[i]
+		index := i + 1
+		res = res + strconv.Itoa(index) + ") " + r.TrackName + ": https://open.spotify.com/track/" + r.Trackid + " \n"
+	}
+	// res := JSON{"Favorites": results}
+	return res, err
 }
 
 func sendGetRequest(url string, body string) ([]byte, string) {
