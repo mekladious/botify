@@ -30,7 +30,7 @@ type (
 	Processor func(session Session, message string) (string, error)
 )
 
-func sampleProcessor(session Session, uuid string, message string) (string, JSON, error) {
+func sampleProcessor(session Session, uuid string, message string) (string, error) {
 	if strings.Contains(strings.ToLower(message), "featured playlists") {
 		featuredPlaylists := Get_featured_playlists()
 		return featuredPlaylists, nil
@@ -41,18 +41,22 @@ func sampleProcessor(session Session, uuid string, message string) (string, JSON
 		}
 	}
 	if strings.Contains(strings.ToLower(message), "favorite") {
-		if strings.Contains(strings.ToLower(message), "add"){
-			trackId := "7c0XG5cIJTrrAgEC3ULPiq" //dummy data
-			res,err := add_to_favorites(uuid, trackId)
-			return res, err
-		} else{
+		if strings.Contains(strings.ToLower(message), "add") {
+			//trackId := "7c0XG5cIJTrrAgEC3ULPiq" //dummy data
+			trackName := "adele"
+			//need to change every space with %20
+			res := getTrackID(trackName)
+			//res,err := add_to_favorites(uuid, trackId)
+			return res, nil
+		} else if strings.Contains(strings.ToLower(message), "show") {
 			res, err := get_favorites(uuid)
 			return res, err
+		} else {
+			return "supported functions: add, show", err
 		}
 	}
 
 	return "Sorry I didn't understand you .. For now you can get featured playlists.. more features coming soon", nil
-
 
 	// // Make sure a history key is defined in the session which points to a slice of strings
 	// _, historyFound := session["history"]
