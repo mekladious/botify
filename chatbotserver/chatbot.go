@@ -61,8 +61,8 @@ func sampleProcessor(session Session, message string, uuid string) (string, erro
 		}
 
 		return reply, nil
-	} else if strings.Contains(message, "i am") || strings.Contains(message, "i feel") {
-		mood := after(message, "i")
+	} else if strings.Contains(message, "i am") {
+		mood := after(message, "i am")
 		if strings.Contains(mood, "happy") || strings.Contains(mood, "excite") || strings.Contains(mood, "cheerful") {
 			Moody := Get_mood("party")
 			return Moody, nil
@@ -81,7 +81,7 @@ func sampleProcessor(session Session, message string, uuid string) (string, erro
 		} else if strings.Contains(mood, "studying") || strings.Contains(mood, "thinking") || strings.Contains(mood, "wrapped up") {
 			Moody := Get_mood("focus")
 			return Moody, nil
-		} else if strings.Contains(mood, "sleepy") || strings.Contains(mood, "drowsy") || strings.Contains(mood, "exhausted") {
+		} else if strings.Contains(mood, "sleep") || strings.Contains(mood, "drowsy") || strings.Contains(mood, "exhausted") {
 			Moody := Get_mood("sleep")
 			return Moody, nil
 		} else if strings.Contains(mood, "love") || strings.Contains(mood, "affectionate") {
@@ -97,7 +97,7 @@ func sampleProcessor(session Session, message string, uuid string) (string, erro
 			Moody := Get_mood("comedy")
 			return Moody, nil
 		} else {
-			return "unknown mood try happy,bored, love,...", nil
+			return "unknown mood try happy,bored, love,tired, moody, sad, excercising, studying, sleepy, travelling,playing,laugh,  ...", nil
 		}
 
 	} else if strings.Contains(message, "info of") {
