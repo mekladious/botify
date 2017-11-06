@@ -149,12 +149,13 @@ func DeleteAlarm(uuid string, alarmTime string) string {
 				if err != nil {
 					return "could not delete alarm err: " + err.Error()
 				}
+				return "alarm deleted successfully"
 			}
 		}
 	} else {
 		return "No alarm with this time found.\n"
 	}
-	return "alarm deleted successfully"
+	return "No alarm with this time found.\n"
 }
 
 // getClient uses a Context and Config to retrieve a Token
