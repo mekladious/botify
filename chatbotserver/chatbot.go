@@ -45,7 +45,10 @@ func sampleProcessor(session Session, message string, uuid string) (string, erro
 		if singerName == "" || alarmTime == "" {
 			return "please use the format 'i want (artist name) to alarm me at (time hh:mm)'", nil
 		}
-		tracks := Get_artist_tracks(singerName)
+		tracks, er := Get_artist_tracks(singerName)
+		if er != nil {
+			return er.Error(), nil
+		}
 		err := InsertAlarmInGoogleCalendar(alarmTime, uuid, tracks)
 		reply := "Done, Alarm is set. " + singerName + " will wake you up at " + alarmTime + "."
 		if err != "" {

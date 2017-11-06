@@ -3,6 +3,7 @@ package chatbot
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -92,21 +93,44 @@ func Get_featured_playlists() string {
 	return sFinal
 }
 
-func Get_artist_tracks(singerName string) string {
+func Get_artist_tracks(singerName string) (string, error) {
 	singerName = strings.Replace(singerName, " ", "%20", -1) // replacing spaces by %20 as required by spotify api
-	artist_id := Get_artist_id(singerName)
+	artist_id, err := Get_artist_id(singerName)
+
+	if err != nil {
+		return "", err
+	}
 
 	body, _ := sendGetRequest("v1/artists/"+artist_id+"/top-tracks?country=US", "")
 	jsonParsed, _ := gabs.ParseJSON(body)
 
 	tracks := jsonParsed.Path("tracks.preview_url")
 
-	return tracks.String()
+	return tracks.String(), nil
+}
+
+func Get_artist_id(singerName string) (string, error) {
+	//replacing spaces with %20
+	strings.Replace("", singerName, singerName, -1)
+	body, _ := sendGetRequest("v1/search?type=artist&q="+singerName+"&limit=1", "")
+
+	jsonParsed, _ := gabs.ParseJSON(body)
+
+	ids := jsonParsed.Path("artists.items.id")
+	if strings.TrimLeft(strings.TrimRight(ids.String(), "\"]"), "[\"") == "{}" {
+		return "", errors.New("invalid artist")
+	}
+
+	return strings.TrimLeft(strings.TrimRight(ids.String(), "\"]"), "[\""), nil
 }
 
 func Get_artist_info(singerName string) string {
 	singerName = strings.Replace(singerName, " ", "%20", -1) // replacing spaces by %20 as required by spotify api
-	artist_id := Get_artist_id(singerName)
+	artist_id, err := Get_artist_id(singerName)
+
+	if err != nil {
+		return err.Error()
+	}
 
 	body, _ := sendGetRequest("v1/artists/"+artist_id, "")
 	jsonParsed, _ := gabs.ParseJSON(body)
@@ -156,18 +180,6 @@ func Get_artist_info(singerName string) string {
 
 	return sFinal
 	//return string(body)
-}
-
-func Get_artist_id(singerName string) string {
-	//replacing spaces with %20
-	strings.Replace("", singerName, singerName, -1)
-	body, _ := sendGetRequest("v1/search?type=artist&q="+singerName+"&limit=1", "")
-
-	jsonParsed, _ := gabs.ParseJSON(body)
-
-	ids := jsonParsed.Path("artists.items.id")
-
-	return strings.TrimLeft(strings.TrimRight(ids.String(), "\"]"), "[\"")
 }
 
 func get_new_releases() string {
@@ -301,6 +313,9 @@ func get_favorites(uuid string) (string, error) {
 
 	var results []Favorite
 	collection.Find(bson.M{"uuid": uuid}).All(&results)
+	if len(results) == 0 {
+		return "You don't have any favorite tracks yet, use favorite add: to add new favorites", nil
+	}
 	// collection.Find(nil).All(&results)
 	res := ""
 	for i := 0; i < len(results); i++ {
