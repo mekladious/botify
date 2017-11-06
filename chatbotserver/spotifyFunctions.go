@@ -54,10 +54,15 @@ func AuthorizeSpotify() string {
 
 func Get_featured_playlists() string {
 	body, _ := sendGetRequest("v1/browse/featured-playlists", "")
-	// bodyJSON := JSON{}
-	// err := json.NewDecoder(bytes.NewBuffer(body)).Decode(&bodyJSON)
+
 	jsonParsed, _ := gabs.ParseJSON(body)
 
+	featured_playlists_string := stringfyPlaylist(jsonParsed)
+
+	return featured_playlists_string
+}
+
+func stringfyPlaylist(jsonParsed *gabs.Container) string {
 	names := jsonParsed.Path("playlists.items.name")
 	hrefs := jsonParsed.Path("playlists.items.external_urls.spotify")
 
@@ -87,9 +92,6 @@ func Get_featured_playlists() string {
 	for i := 0; i < x-1; i++ {
 		sFinal = sFinal + s2[i] + " : " + s4[i] + " \n"
 	}
-
-	fmt.Println(sFinal)
-	//fmt.Println(hrefs)
 	return sFinal
 }
 
