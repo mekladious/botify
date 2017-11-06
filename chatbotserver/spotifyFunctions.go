@@ -57,42 +57,9 @@ func Get_featured_playlists() string {
 
 	jsonParsed, _ := gabs.ParseJSON(body)
 
-	featured_playlists_string := stringfyPlaylist(jsonParsed)
+	featured_playlists_string := stringfyJSON(jsonParsed, "playlist")
 
 	return featured_playlists_string
-}
-
-func stringfyPlaylist(jsonParsed *gabs.Container) string {
-	names := jsonParsed.Path("playlists.items.name")
-	hrefs := jsonParsed.Path("playlists.items.external_urls.spotify")
-
-	s1 := ""
-	children, _ := names.Children()
-	for _, child := range children {
-		s1 = s1 + child.Data().(string)
-		s1 = s1 + ","
-
-	}
-
-	s2 := strings.Split(s1, ",")
-
-	s3 := ""
-	children1, _ := hrefs.Children()
-	for _, child := range children1 {
-		s3 = s3 + child.Data().(string)
-		s3 = s3 + "$"
-
-	}
-
-	s4 := strings.Split(s3, "$")
-	x := len(s2)
-
-	//x := len(s4)
-	sFinal := ""
-	for i := 0; i < x-1; i++ {
-		sFinal = sFinal + s2[i] + " : " + s4[i] + " \n"
-	}
-	return sFinal
 }
 
 func Get_artist_tracks(singerName string) (string, error) {
@@ -136,131 +103,28 @@ func Get_artist_info(singerName string) string {
 
 	body, _ := sendGetRequest("v1/artists/"+artist_id, "")
 	jsonParsed, _ := gabs.ParseJSON(body)
-	//name := ""
-	//followers := 0
-	//test := jsonParsed.Path(name)
 
-	name := jsonParsed.Path("name").Data().(string)
-	followers := jsonParsed.Path("followers.total").Data().(float64)
-	z := int(followers)
-	f := fmt.Sprint(z)
-	genres := jsonParsed.Path("genres")
-	s1 := ""
-	children, _ := genres.Children()
-	for _, child := range children {
-		s1 = s1 + child.Data().(string)
-		s1 = s1 + ","
+	artistInfo := stringfyArtist(jsonParsed)
 
-	}
-	s2 := strings.Split(s1, ",")
-	y := len(s2)
-	s5 := ""
-	for i := 0; i < y-1; i++ {
-		s5 = s5 + s2[i] + " , "
-	}
-
-	images := jsonParsed.Path("images.url")
-	s3 := ""
-	children1, _ := images.Children()
-	for _, child := range children1 {
-		s3 = s3 + child.Data().(string)
-		s3 = s3 + ","
-
-	}
-	s4 := strings.Split(s3, ",")
-	x := len(s4)
-	s6 := ""
-	for i := 0; i < x-1; i++ {
-		s6 = s6 + s4[i] + " , "
-	}
-	sFinal := ""
-	sFinal += name + "\n" +
-		"has " + f + " followers\n" +
-		"specializes in " + s5 + ".\n" +
-		"Pictures: " + s6
-	fmt.Println(sFinal)
-
-	return sFinal
-	//return string(body)
+	return artistInfo
 }
 
 func get_new_releases() string {
 	body, _ := sendGetRequest("v1/browse/new-releases", "")
 	jsonParsed, _ := gabs.ParseJSON(body)
 
-	names := jsonParsed.Path("albums.items.name")
-	hrefs := jsonParsed.Path("albums.items.external_urls.spotify")
+	newReleases := stringfyJSON(jsonParsed, "album")
 
-	s1 := ""
-	children, _ := names.Children()
-	for _, child := range children {
-		s1 = s1 + child.Data().(string)
-		s1 = s1 + "$"
-
-	}
-
-	s2 := strings.Split(s1, "$")
-
-	s3 := ""
-	children1, _ := hrefs.Children()
-	for _, child := range children1 {
-		s3 = s3 + child.Data().(string)
-		s3 = s3 + "$"
-
-	}
-
-	s4 := strings.Split(s3, "$")
-	x := len(s4)
-
-	//x := len(s4)
-	sFinal := ""
-	for i := 0; i < x-1; i++ {
-		sFinal = sFinal + s2[i] + " : " + s4[i] + " \n"
-	}
-
-	fmt.Println(sFinal)
-	//fmt.Println(hrefs)
-	return sFinal
+	return newReleases
 }
 
 func Get_mood(mood string) string {
 	body, _ := sendGetRequest("v1/browse/categories/"+mood+"/playlists", "")
 	jsonParsed, _ := gabs.ParseJSON(body)
 
-	names := jsonParsed.Path("playlists.items.name")
-	hrefs := jsonParsed.Path("playlists.items.external_urls.spotify")
+	playlists := stringfyJSON(jsonParsed, "playlist")
 
-	s1 := ""
-	children, _ := names.Children()
-	for _, child := range children {
-		s1 = s1 + child.Data().(string)
-		s1 = s1 + ","
-
-	}
-
-	s2 := strings.Split(s1, ",")
-
-	s3 := ""
-	children1, _ := hrefs.Children()
-	for _, child := range children1 {
-		s3 = s3 + child.Data().(string)
-		s3 = s3 + "$"
-
-	}
-
-	s4 := strings.Split(s3, "$")
-	x := len(s2)
-
-	//x := len(s4)
-	sFinal := ""
-	for i := 0; i < x-1; i++ {
-		sFinal = sFinal + s2[i] + " : " + s4[i] + " \n"
-	}
-
-	fmt.Println(sFinal)
-	//fmt.Println(hrefs)
-	return sFinal
-	//playlist := Get_playlist_tracks()
+	return playlists
 }
 
 func min(x int, y int) int {
@@ -272,14 +136,24 @@ func min(x int, y int) int {
 }
 
 func search(keyword string) string {
-	artist, _ := sendGetRequest("v1/search?q="+keyword+"&type=artist", "")
+	// artist, _ := sendGetRequest("v1/search?q="+keyword+"&type=artist", "")
+	// artistJsonParsed, _ := gabs.ParseJSON(artist)
 	playlist, _ := sendGetRequest("v1/search?q="+keyword+"&type=playlist", "")
+	playlistJsonParsed, _ := gabs.ParseJSON(playlist)
 	album, _ := sendGetRequest("v1/search?q="+keyword+"&type=album", "")
+	albumJsonParsed, _ := gabs.ParseJSON(album)
 	track, _ := sendGetRequest("v1/search?q="+keyword+"&type=track", "")
+	trackJsonParsed, _ := gabs.ParseJSON(track)
 
-	result := append(artist, playlist...)
-	result = append(result, album...)
-	result = append(result, track...)
+	result := "Artists: \n\n"
+	// result += stringfyArtist(artistJsonParsed)
+	result += Get_artist_info(keyword)
+	result += "\n\n Playlists: \n\n"
+	result += stringfyJSON(playlistJsonParsed, "playlist")
+	result += "\n\n Albums: \n\n"
+	result += stringfyJSON(albumJsonParsed, "album")
+	result += "\n\n Tracks: \n\n"
+	result += stringfyJSON(trackJsonParsed, "track")
 
 	return string(result)
 }
@@ -358,4 +232,89 @@ func sendGetRequest(url string, body string) ([]byte, string) {
 	fmt.Println("response Body:", string(respBody))
 
 	return respBody, string(resp.Status)
+}
+
+func stringfyArtist(jsonParsed *gabs.Container) string {
+	name := jsonParsed.Path("name").Data().(string)
+	followers := jsonParsed.Path("followers.total").Data().(float64)
+
+	z := int(followers)
+	f := fmt.Sprint(z)
+	genres := jsonParsed.Path("genres")
+	s1 := ""
+	children, _ := genres.Children()
+	for _, child := range children {
+		s1 = s1 + child.Data().(string)
+		s1 = s1 + ","
+
+	}
+	s2 := strings.Split(s1, ",")
+	y := len(s2)
+	s5 := ""
+	for i := 0; i < y-1; i++ {
+		s5 = s5 + s2[i] + " , "
+	}
+
+	images := jsonParsed.Path("images.url")
+	s3 := ""
+	children1, _ := images.Children()
+	for _, child := range children1 {
+		s3 = s3 + child.Data().(string)
+		s3 = s3 + ","
+
+	}
+	s4 := strings.Split(s3, ",")
+	x := len(s4)
+	s6 := ""
+	for i := 0; i < x-1; i++ {
+		s6 = s6 + s4[i] + " , "
+	}
+	sFinal := ""
+	sFinal += name + "\n" +
+		"has " + f + " followers\n" +
+		"specializes in " + s5 + ".\n" +
+		"Pictures: " + s6
+	return sFinal
+}
+
+func stringfyJSON(jsonParsed *gabs.Container, jsontype string) string {
+	var names *gabs.Container
+	var hrefs *gabs.Container
+	if jsontype == "playlist" {
+		names = jsonParsed.Path("playlists.items.name")
+		hrefs = jsonParsed.Path("playlists.items.external_urls.spotify")
+	} else if jsontype == "album" {
+		names = jsonParsed.Path("albums.items.name")
+		hrefs = jsonParsed.Path("albums.items.external_urls.spotify")
+	} else if jsontype == "track" {
+		names = jsonParsed.Path("tracks.items.name")
+		hrefs = jsonParsed.Path("tracks.items.external_urls.spotify")
+	}
+
+	s1 := ""
+	children, _ := names.Children()
+	for _, child := range children {
+		s1 = s1 + child.Data().(string)
+		s1 = s1 + ","
+
+	}
+
+	s2 := strings.Split(s1, ",")
+
+	s3 := ""
+	children1, _ := hrefs.Children()
+	for _, child := range children1 {
+		s3 = s3 + child.Data().(string)
+		s3 = s3 + "$"
+
+	}
+
+	s4 := strings.Split(s3, "$")
+	x := min(len(s2), len(s4))
+
+	sFinal := ""
+	for i := 0; i < x-1; i++ {
+		sFinal = sFinal + s2[i] + " : " + s4[i] + " \n"
+	}
+	return sFinal
 }
