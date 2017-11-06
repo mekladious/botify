@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"golang.org/x/net/context"
@@ -21,7 +22,7 @@ import (
 var srv *calendar.Service
 
 //InsertAlarmInGoogleCalendar takes time in format hh:mm AM and user uuid and tracks to be played when alarm is on
-func InsertAlarmInGoogleCalendar(alarmTime string, uuid string, tracks string) string {
+func InsertAlarmInGoogleCalendar(alarmTime string, uuid string, tracks string, singerName string) string {
 	connectGoogleCalendar()
 	now := time.Now()
 
@@ -37,6 +38,13 @@ func InsertAlarmInGoogleCalendar(alarmTime string, uuid string, tracks string) s
 	if err != nil {
 		log.Fatalf("Unable to create alarm. %v \n", err)
 		return "Unable to create alarm."
+	}
+
+	if InputHour > 23 {
+		return "Unable to create alarm hour must be less than 24"
+	}
+	if InputMinute > 59 {
+		return "Unable to create alarm minute must be less than 60"
 	}
 	// fmt.Println("input hour", before(alarmTime, ":"))
 	// fmt.Println("input hour", InputHour)
@@ -55,7 +63,7 @@ func InsertAlarmInGoogleCalendar(alarmTime string, uuid string, tracks string) s
 	}
 
 	alarm := &calendar.Event{
-		Summary:     uuid,
+		Summary:     uuid + "|" + singerName,
 		Description: tracks,
 		Start: &calendar.EventDateTime{
 			DateTime: time.Date(now.Year(), now.Month(), now.Day(), InputHour-2, InputMinute, 0, 0, time.UTC).Format(time.RFC3339),
@@ -77,17 +85,17 @@ func InsertAlarmInGoogleCalendar(alarmTime string, uuid string, tracks string) s
 	return ""
 }
 
-// GetNext10Events gets next 10 events from calendar .. this is a quick start guide function from google
-func GetNext10Events() {
+// GetAlarms gets user next alarms from calendar
+func GetAlarms(uuid string) string {
 	connectGoogleCalendar()
 	t := time.Now().Format(time.RFC3339)
 	events, err := srv.Events.List("primary").ShowDeleted(false).
-		SingleEvents(true).TimeMin(t).MaxResults(10).OrderBy("startTime").Do()
+		SingleEvents(true).TimeMin(t).OrderBy("startTime").Do()
 	if err != nil {
 		log.Fatalf("Unable to retrieve next ten of the user's events. %v", err)
 	}
-
-	fmt.Println("Upcoming events:")
+	alarms := ""
+	alarms += "Upcoming alarms: \n\n"
 	if len(events.Items) > 0 {
 		for _, i := range events.Items {
 			var when string
@@ -98,12 +106,56 @@ func GetNext10Events() {
 			} else {
 				when = i.Start.Date
 			}
-			fmt.Printf("%s (%s)\n", i.Summary, when)
+			when = before(when, "+")
+			// alarmTime, _ := time.Parse("2016-01-02T15:04:05", when)
+			summary := strings.Split(i.Summary, "|")
+			if summary[0] == uuid {
+				date := before(when, "T")
+				hm := between(when, "T", ":00")
+				alarms += summary[1] + " on " + date + " at " + hm + "\n"
+			}
 		}
 	} else {
-		fmt.Printf("No upcoming events found.\n")
+		alarms = "No upcoming alarms found.\n"
+	}
+	return alarms
+}
+
+// DeleteAlarm deletes alarm with given time and uuid
+func DeleteAlarm(uuid string, alarmTime string) string {
+	connectGoogleCalendar()
+	t := time.Now().Format(time.RFC3339)
+	events, err := srv.Events.List("primary").ShowDeleted(false).
+		SingleEvents(true).TimeMin(t).OrderBy("startTime").Do()
+	if err != nil {
+		log.Fatalf("Unable to retrieve next ten of the user's alarms. %v", err)
 	}
 
+	if len(events.Items) > 0 {
+		for _, i := range events.Items {
+			var when string
+			// If the DateTime is an empty string the Event is an all-day Event.
+			// So only Date is available.
+			if i.Start.DateTime != "" {
+				when = i.Start.DateTime
+			} else {
+				when = i.Start.Date
+			}
+			when = before(when, "+")
+			// alarmTime, _ := time.Parse("2016-01-02T15:04:05", when)
+			summary := strings.Split(i.Summary, "|")
+			if summary[0] == uuid && strings.Contains(summary[1], alarmTime) {
+				err := srv.Events.Delete("primary", i.Id).Do()
+				if err != nil {
+					return "could not delete alarm err: " + err.Error()
+				}
+				return "alarm deleted successfully"
+			}
+		}
+	} else {
+		return "No alarm with this time found.\n"
+	}
+	return "No alarm with this time found.\n"
 }
 
 // getClient uses a Context and Config to retrieve a Token

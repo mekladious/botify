@@ -37,9 +37,14 @@ func sampleProcessor(session Session, message string, uuid string) (string, erro
 		featuredPlaylists := Get_featured_playlists()
 		return featuredPlaylists, nil
 	} else if strings.Contains(message, "alarm") {
-		//format : i want (artist name) to alarm me
-		//singerName := strings.TrimLeft(strings.TrimRight(message, "to"), "want")
-		//singerName := regexp.MustCompile("want (.*?) to").FindStringSubmatch(message) //works with single name
+		if strings.Contains(message, "show") {
+			alarms := GetAlarms(uuid)
+			return alarms, nil
+		}
+		if strings.Contains(message, "delete") {
+			deleteAlarm := DeleteAlarm(uuid, after(message, ": "))
+			return deleteAlarm, nil
+		}
 		singerName := between(message, "want", "to")
 		alarmTime := after(message, "at")
 		if singerName == "" || alarmTime == "" {
@@ -49,7 +54,7 @@ func sampleProcessor(session Session, message string, uuid string) (string, erro
 		if er != nil {
 			return er.Error(), nil
 		}
-		err := InsertAlarmInGoogleCalendar(alarmTime, uuid, tracks)
+		err := InsertAlarmInGoogleCalendar(alarmTime, uuid, tracks, singerName)
 		reply := "Done, Alarm is set. " + singerName + " will wake you up at " + alarmTime + "."
 		if err != "" {
 			reply = err
@@ -122,9 +127,7 @@ func sampleProcessor(session Session, message string, uuid string) (string, erro
 			return "No results were found for your search, please try again", nil
 		}
 
-	}
-
-	if strings.Contains(strings.ToLower(message), "new") && strings.Contains(strings.ToLower(message), "release") {
+	} else if strings.Contains(strings.ToLower(message), "new") && strings.Contains(strings.ToLower(message), "release") {
 		newReleases := get_new_releases()
 		return newReleases, nil
 	} else if strings.Contains(strings.ToLower(message), "favorite") {
@@ -140,8 +143,11 @@ func sampleProcessor(session Session, message string, uuid string) (string, erro
 		} else if strings.Contains(strings.ToLower(message), "show") {
 			res, err := get_favorites(uuid)
 			return res, err
+		} else if strings.Contains(strings.ToLower(message), "delete") {
+			res, err := delete_favorite(uuid, after(message, ":"))
+			return res, err
 		} else {
-			return "supported functions: add, show", nil
+			return "supported functions: add, show, delete", nil
 		}
 	} else {
 		result := checkForSymbols(UnknownAnswer(message))
