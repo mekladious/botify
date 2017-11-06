@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"golang.org/x/net/context"
@@ -21,7 +22,7 @@ import (
 var srv *calendar.Service
 
 //InsertAlarmInGoogleCalendar takes time in format hh:mm AM and user uuid and tracks to be played when alarm is on
-func InsertAlarmInGoogleCalendar(alarmTime string, uuid string, tracks string) string {
+func InsertAlarmInGoogleCalendar(alarmTime string, uuid string, tracks string, singerName string) string {
 	connectGoogleCalendar()
 	now := time.Now()
 
@@ -55,7 +56,7 @@ func InsertAlarmInGoogleCalendar(alarmTime string, uuid string, tracks string) s
 	}
 
 	alarm := &calendar.Event{
-		Summary:     uuid,
+		Summary:     uuid + "|" + singerName,
 		Description: tracks,
 		Start: &calendar.EventDateTime{
 			DateTime: time.Date(now.Year(), now.Month(), now.Day(), InputHour-2, InputMinute, 0, 0, time.UTC).Format(time.RFC3339),
@@ -98,8 +99,9 @@ func GetAlarms(uuid string) string {
 			} else {
 				when = i.Start.Date
 			}
-			if i.Summary == uuid {
-				alarms += when + "\n"
+			summary := strings.Split(i.Summary, "|")
+			if summary[0] == uuid {
+				alarms += summary[1] + " at " + when + "\n"
 			}
 		}
 	} else {

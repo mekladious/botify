@@ -50,7 +50,7 @@ func sampleProcessor(session Session, message string, uuid string) (string, erro
 		if er != nil {
 			return er.Error(), nil
 		}
-		err := InsertAlarmInGoogleCalendar(alarmTime, uuid, tracks)
+		err := InsertAlarmInGoogleCalendar(alarmTime, uuid, tracks, singerName)
 		reply := "Done, Alarm is set. " + singerName + " will wake you up at " + alarmTime + "."
 		if err != "" {
 			reply = err
