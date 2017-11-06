@@ -96,6 +96,7 @@ func GetAlarms(uuid string) string {
 	}
 	alarms := ""
 	alarms += "Upcoming alarms: \n\n"
+	foundalarm := false
 	if len(events.Items) > 0 {
 		for _, i := range events.Items {
 			var when string
@@ -110,6 +111,7 @@ func GetAlarms(uuid string) string {
 			// alarmTime, _ := time.Parse("2016-01-02T15:04:05", when)
 			summary := strings.Split(i.Summary, "|")
 			if summary[0] == uuid {
+				foundalarm = true
 				date := before(when, "T")
 				hm := between(when, "T", ":00")
 				alarms += summary[1] + " on " + date + " at " + hm + "\n"
@@ -118,7 +120,11 @@ func GetAlarms(uuid string) string {
 	} else {
 		alarms = "No upcoming alarms found.\n"
 	}
-	return alarms
+	if foundalarm {
+		return alarms
+	} else {
+		return "No upcoming alarms found."
+	}
 }
 
 // DeleteAlarm deletes alarm with given time and uuid
