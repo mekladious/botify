@@ -16,9 +16,10 @@ import (
 
 type (
 	Favorite struct {
-		ID			bson.ObjectId `bson:"_id,omitempty"`
-		Uuid		string `bson:"uuid"`
-		Trackid		string `bson:"trackid"`
+		ID       bson.ObjectId `bson:"_id,omitempty"`
+		Uuid     string        `bson:"uuid"`
+		Trackid  string        `bson:"trackid"`
+		trakName strine        `bson:"trackName"`
 	}
 )
 
@@ -90,6 +91,13 @@ func Get_featured_playlists() string {
 	return sFinal
 }
 
+func getTrackID(trackName string) string {
+	tracks, _ := sendGetRequest("v1/search?q="+trackName+"&type=track", "")
+
+	return string(track)
+}
+
+func add_to_favorites(uuid string, trackid string, trackName string) (string, error) {
 func Get_artist_tracks(singerName string) string {
 	singerName = strings.Replace(singerName, " ", "%20", -1) // replacing spaces by %20 as required by spotify api
 	artist_id := Get_artist_id(singerName)
@@ -271,23 +279,26 @@ func search(keyword string) string {
 func add_to_favorites(uuid string, trackid string) (string, error){
 	db, err := mgo.Dial(db_uri)
 	collection := db.DB("botify").C("Favorites")
-	err = collection.Insert(&Favorite{Uuid:uuid, Trackid:trackid})
-	if err!= nil{
+	err = collection.Insert(&Favorite{Uuid: uuid, Trackid: trackid, trakName: trakeName})
+	if err != nil {
 		return "", err
-	} else{
+	} else {
 		return "success", nil
 	}
 }
 
-func get_favorites(uuid string) (JSON, error){
+func get_favorites(uuid string) (string, error) {
 	db, err := mgo.Dial(db_uri)
 	collection := db.DB("botify").C("Favorites")
-	
+
 	var results []Favorite
 	collection.Find(bson.M{"uuid": uuid}).All(&results)
 	// collection.Find(nil).All(&results)
-
-	res := JSON{"Favorites":results}
+	res := ""
+	for i := 0; i < results.length; i++ {
+		res = res + r.trackName + ": https://open.spotify.com/track/" + r.trackid + " \n"
+	}
+	// res := JSON{"Favorites": results}
 	return res, err
 }
 

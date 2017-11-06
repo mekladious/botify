@@ -131,13 +131,18 @@ func sampleProcessor(session Session, message string, uuid string) (string, erro
 		}
 	}
 	if strings.Contains(strings.ToLower(message), "favorite") {
-		if strings.Contains(strings.ToLower(message), "add"){
-			trackId := "7c0XG5cIJTrrAgEC3ULPiq" //dummy data
-			res,err := add_to_favorites(uuid, trackId)
-			return res, err
-		} else{
+		if strings.Contains(strings.ToLower(message), "add") {
+			//trackId := "7c0XG5cIJTrrAgEC3ULPiq" //dummy data
+			trackName := "adele"
+			//need to change every space with %20
+			res := getTrackID(trackName)
+			//res,err := add_to_favorites(uuid, trackId)
+			return res, nil
+		} else if strings.Contains(strings.ToLower(message), "show") {
 			res, err := get_favorites(uuid)
 			return res, err
+		} else {
+			return "supported functions: add, show", err
 		}
 	}
 
