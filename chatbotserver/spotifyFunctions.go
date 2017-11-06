@@ -309,38 +309,6 @@ func get_favorites(uuid string) (string, error) {
 	return res, err
 }
 
-func getTrackID(trackName string) string {
-	tracks, _ := sendGetRequest("v1/search?q="+trackName+"&type=track", "")
-
-	return string(track)
-}
-
-func add_to_favorites(uuid string, trackid string, trackName string) (string, error) {
-	db, err := mgo.Dial(db_uri)
-	collection := db.DB("botify").C("Favorites")
-	err = collection.Insert(&Favorite{Uuid: uuid, Trackid: trackid, trakName: trakeName})
-	if err != nil {
-		return "", err
-	} else {
-		return "success", nil
-	}
-}
-
-func get_favorites(uuid string) (string, error) {
-	db, err := mgo.Dial(db_uri)
-	collection := db.DB("botify").C("Favorites")
-
-	var results []Favorite
-	collection.Find(bson.M{"uuid": uuid}).All(&results)
-	// collection.Find(nil).All(&results)
-	res := ""
-	for i := 0; i < results.length; i++ {
-		res = res + r.trackName + ": https://open.spotify.com/track/" + r.trackid + " \n"
-	}
-	// res := JSON{"Favorites": results}
-	return res, err
-}
-
 func sendGetRequest(url string, body string) ([]byte, string) {
 	defer func() {
 		fmt.Println("Recovered from get request error: ", recover())
