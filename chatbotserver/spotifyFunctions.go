@@ -286,6 +286,9 @@ func add_to_favorites(uuid string, trackid string, trackName string) (string, er
 	collection := db.DB("botify").C("Favorites")
 	err = collection.Insert(&Favorite{Uuid: uuid, Trackid: trackid, TrackName: trackName})
 	if err != nil {
+		if strings.Contains(err.Error(), "duplicate") {
+			return "This track already exists in your favorites", nil
+		}
 		return "", err
 	} else {
 		return trackName + " successfully added to your favourites", nil
