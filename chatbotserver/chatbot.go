@@ -96,6 +96,8 @@ func sampleProcessor(session Session, message string, uuid string) (string, erro
 		} else if strings.Contains(mood, "going out") || strings.Contains(mood, "laugh") {
 			Moody := Get_mood("comedy")
 			return Moody, nil
+		} else {
+			return "unknown mood try happy,bored, love,...", nil
 		}
 
 	} else if strings.Contains(message, "info of") {
