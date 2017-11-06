@@ -112,9 +112,8 @@ func GetAlarms(uuid string) string {
 			if summary[0] == uuid {
 				day := strconv.Itoa(alarmTime.Day())
 				month := alarmTime.Month().String()
-				hour := strconv.Itoa(alarmTime.Hour())
-				minute := strconv.Itoa(alarmTime.Minute())
-				alarms += summary[1] + " on " + day + "/" + month + " at " + hour + ":" + minute + "\n"
+				hm := between(when, "T", ":00")
+				alarms += summary[1] + " on " + day + " " + month + " at " + hm + "\n"
 			}
 		}
 	} else {
