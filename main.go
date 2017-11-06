@@ -43,7 +43,7 @@ import _ "github.com/joho/godotenv/autoload"
 
 func main() {
 	// Uncomment the following lines to customize the chatbot
-	chatbot.WelcomeMessage = "Hello, Botify is ready to inspire you ;)"
+	// chatbot.WelcomeMessage = "Hello, Botify is ready to inspire you ;)"
 	//chatbot.ProcessFunc(chatbotProcess)
 
 	// Use the PORT environment variable
@@ -56,4 +56,5 @@ func main() {
 	// Start the server
 	fmt.Printf("Listening on port %s...\n", port)
 	log.Fatalln(chatbot.Engage(":" + port))
+
 }

@@ -1,23 +1,13 @@
 package chatbot
 
 import (
-	"crypto/md5"
-	"encoding/hex"
-	"encoding/json"
-	"fmt"
-	"log"
-	"net/http"
-	"net/http/httptest"
-	"strconv"
+	"regexp"
 	"strings"
-	"time"
-
-	cors "github.com/heppu/simple-cors"
 )
 
 var (
 	// WelcomeMessage A constant to hold the welcome message
-	WelcomeMessage = "Welcome, what do you want to order?"
+	WelcomeMessage = "Hello, Botify is ready to inspire you ;)"
 
 	// sessions = {
 	//   "uuid1" = Session{...},
@@ -41,12 +31,124 @@ type (
 	Processor func(session Session, message string) (string, error)
 )
 
-func sampleProcessor(session Session, message string) (string, error) {
-	if strings.Contains(strings.ToLower(message), "featured playlists") {
+func sampleProcessor(session Session, message string, uuid string) (string, error) {
+	message = strings.ToLower(message)
+	if strings.Contains(message, "featured playlists") {
 		featuredPlaylists := Get_featured_playlists()
 		return featuredPlaylists, nil
+	} else if strings.Contains(message, "alarm") {
+		if strings.Contains(message, "show") {
+			alarms := GetAlarms(uuid)
+			return alarms, nil
+		}
+		if strings.Contains(message, "delete") {
+			deleteAlarm := DeleteAlarm(uuid, after(message, ": "))
+			return deleteAlarm, nil
+		}
+		singerName := between(message, "want", "to")
+		alarmTime := after(message, "at")
+		if singerName == "" || alarmTime == "" {
+			return "please use the format 'i want (artist name) to alarm me at (time hh:mm)'", nil
+		}
+		tracks, er := Get_artist_tracks(singerName)
+		if er != nil {
+			return er.Error(), nil
+		}
+		err := InsertAlarmInGoogleCalendar(alarmTime, uuid, tracks, singerName)
+		reply := "Done, Alarm is set. " + singerName + " will wake you up at " + alarmTime + "."
+		if err != "" {
+			reply = err
+		}
+
+		return reply, nil
+	} else if strings.Contains(message, "i am") {
+		mood := after(message, "i am")
+		if strings.Contains(mood, "happy") || strings.Contains(mood, "excite") || strings.Contains(mood, "cheerful") {
+			Moody := Get_mood("party")
+			return Moody, nil
+		} else if strings.Contains(mood, "tired") || strings.Contains(mood, "chilling") || strings.Contains(mood, "bored") || strings.Contains(mood, "stressed") {
+			Moody := Get_mood("chill")
+			return Moody, nil
+		} else if strings.Contains(mood, "moody") || strings.Contains(mood, "unstable") {
+			Moody := Get_mood("mood")
+			return Moody, nil
+		} else if strings.Contains(mood, "angry") || strings.Contains(mood, "furious") || strings.Contains(mood, "annoyed") || strings.Contains(mood, "sad") {
+			Moody := Get_mood("rock")
+			return Moody, nil
+		} else if strings.Contains(mood, "excercising") || strings.Contains(mood, "working out") || strings.Contains(mood, "training") {
+			Moody := Get_mood("workout")
+			return Moody, nil
+		} else if strings.Contains(mood, "studying") || strings.Contains(mood, "thinking") || strings.Contains(mood, "wrapped up") {
+			Moody := Get_mood("focus")
+			return Moody, nil
+		} else if strings.Contains(mood, "sleep") || strings.Contains(mood, "drowsy") || strings.Contains(mood, "exhausted") {
+			Moody := Get_mood("sleep")
+			return Moody, nil
+		} else if strings.Contains(mood, "love") || strings.Contains(mood, "affectionate") {
+			Moody := Get_mood("romance")
+			return Moody, nil
+		} else if strings.Contains(mood, "travelling") || strings.Contains(mood, "on the road") {
+			Moody := Get_mood("travel")
+			return Moody, nil
+		} else if strings.Contains(mood, "play") || strings.Contains(mood, "fun") {
+			Moody := Get_mood("gaming")
+			return Moody, nil
+		} else if strings.Contains(mood, "going out") || strings.Contains(mood, "laugh") {
+			Moody := Get_mood("comedy")
+			return Moody, nil
+		} else {
+			return "unknown mood try happy,bored, love,tired, moody, sad, excercising, studying, sleepy, travelling,playing,laugh,  ...", nil
+		}
+
+	} else if strings.Contains(message, "info of") {
+		artist := after(message, "info of")
+		info := Get_artist_info(artist)
+		return info, nil
+	} else if strings.Contains(strings.ToLower(message), "search") || strings.Contains(strings.ToLower(message), "play") {
+		message = strings.Replace(message, "search", "", -1)
+		message = strings.Replace(message, "play", "", -1)
+		message = strings.Replace(message, " ", "+", -1)
+		reg, _ := regexp.Compile("[^a-zA-Z0-9]+")
+		message = reg.ReplaceAllString(message, "")
+
+		results := search(message)
+
+		if results != "null" {
+			return results, nil
+		} else {
+			return "No results were found for your search, please try again", nil
+		}
+
+	} else if strings.Contains(strings.ToLower(message), "new") && strings.Contains(strings.ToLower(message), "release") {
+		newReleases := get_new_releases()
+		return newReleases, nil
+	} else if strings.Contains(strings.ToLower(message), "favorite") {
+		if strings.Contains(strings.ToLower(message), "add") {
+			//trackId := "7c0XG5cIJTrrAgEC3ULPiq" //dummy data
+			trackName := after(message, ":")
+			trackid := getTrackID(trackName)
+			if trackid == "nil" {
+				return "track not found", nil
+			}
+			res, err := add_to_favorites(uuid, trackid, trackName)
+			return res, err
+		} else if strings.Contains(strings.ToLower(message), "show") {
+			res, err := get_favorites(uuid)
+			return res, err
+		} else if strings.Contains(strings.ToLower(message), "delete") {
+			res, err := delete_favorite(uuid, after(message, ":"))
+			return res, err
+		} else {
+			return "supported functions: add, show, delete", nil
+		}
+	} else {
+		result := checkForSymbols(UnknownAnswer(message))
+		if result != "" {
+			return result, nil
+		}
 	}
-	return "Sorry I didn't understand you .. For now you can get featured playlists.. more features coming soon", nil
+
+	return "Sorry I didn't understand you .. For now you can get featured playlists and new releases.. more features coming soon", nil
 
 	// // Make sure a history key is defined in the session which points to a slice of strings
 	// _, historyFound := session["history"]
@@ -80,127 +182,4 @@ func sampleProcessor(session Session, message string) (string, error) {
 	// session["history"] = history
 
 	// return fmt.Sprintf("So, you want %s! What else?", strings.ToLower(sentence)), nil
-}
-
-// withLog Wraps HandlerFuncs to log requests to Stdout
-func withLog(fn http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		c := httptest.NewRecorder()
-		fn(c, r)
-		log.Printf("[%d] %-4s %s \n", c.Code, r.Method, r.URL.Path)
-
-		for k, v := range c.HeaderMap {
-			w.Header()[k] = v
-		}
-		w.WriteHeader(c.Code)
-		c.Body.WriteTo(w)
-	}
-}
-
-// writeJSON Writes the JSON equivilant for data into ResponseWriter w
-func writeJSON(w http.ResponseWriter, data JSON) {
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(data)
-}
-
-// ProcessFunc Sets the processor of the chatbot
-func ProcessFunc(p Processor) {
-	//processor = p
-}
-
-// handleWelcome Handles /welcome and responds with a welcome message and a generated UUID
-func handleWelcome(w http.ResponseWriter, r *http.Request) {
-	// Generate a UUID.
-	hasher := md5.New()
-	hasher.Write([]byte(strconv.FormatInt(time.Now().Unix(), 10)))
-	uuid := hex.EncodeToString(hasher.Sum(nil))
-
-	// Create a session for this UUID
-	sessions[uuid] = Session{}
-
-	//starting to connect to Spotify
-	if SpotifyAuthorizationToken == "" {
-		log.Print("No spotify authorization token.. started to get one")
-		SpotifyAuthorizationToken = AuthorizeSpotify()
-	}
-
-	// Write a JSON containg the welcome message and the generated UUID
-	writeJSON(w, JSON{
-		"uuid":    uuid,
-		"message": WelcomeMessage,
-	})
-}
-
-func handleChat(w http.ResponseWriter, r *http.Request) {
-	// Make sure only POST requests are handled
-	if r.Method != http.MethodPost {
-		http.Error(w, "Only POST requests are allowed.", http.StatusMethodNotAllowed)
-		return
-	}
-
-	// Make sure a UUID exists in the Authorization header
-	uuid := r.Header.Get("Authorization")
-	if uuid == "" {
-		http.Error(w, "Missing or empty Authorization header.", http.StatusUnauthorized)
-		return
-	}
-
-	// Make sure a session exists for the extracted UUID
-	session, sessionFound := sessions[uuid]
-	if !sessionFound {
-		http.Error(w, fmt.Sprintf("No session found for: %v.", uuid), http.StatusUnauthorized)
-		return
-	}
-
-	// Parse the JSON string in the body of the request
-	data := JSON{}
-	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
-		http.Error(w, fmt.Sprintf("Couldn't decode JSON: %v.", err), http.StatusBadRequest)
-		return
-	}
-	defer r.Body.Close()
-
-	// Make sure a message key is defined in the body of the request
-	_, messageFound := data["message"]
-	if !messageFound {
-		http.Error(w, "Missing message key in body.", http.StatusBadRequest)
-		return
-	}
-
-	// Process the received message
-	message, err := processor(session, data["message"].(string))
-	if err != nil {
-		http.Error(w, err.Error(), 422 /* http.StatusUnprocessableEntity */)
-		return
-	}
-
-	// Write a JSON containg the processed response
-	writeJSON(w, JSON{
-		"message": message,
-	})
-}
-
-// handle Handles /
-func handle(w http.ResponseWriter, r *http.Request) {
-	body :=
-		"<!DOCTYPE html><html><head><title>Chatbot</title></head><body><pre style=\"font-family: monospace;\">\n" +
-			"Available Routes:\n\n" +
-			"  GET  /welcome -> handleWelcome\n" +
-			"  POST /chat    -> handleChat\n" +
-			"  GET  /        -> handle        (current)\n" +
-			"</pre></body></html>"
-	w.Header().Add("Content-Type", "text/html")
-	fmt.Fprintln(w, body)
-}
-
-// Engage Gives control to the chatbot
-func Engage(addr string) error {
-	// HandleFuncs
-	mux := http.NewServeMux()
-	mux.HandleFunc("/welcome", withLog(handleWelcome))
-	mux.HandleFunc("/chat", withLog(handleChat))
-	mux.HandleFunc("/", withLog(handle))
-
-	// Start the server
-	return http.ListenAndServe(addr, cors.CORS(mux))
 }
