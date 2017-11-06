@@ -289,7 +289,7 @@ func sendGetRequest(url string, body string) ([]byte, string) {
 	fmt.Println("response Status:", resp.Status)
 	//	fmt.Println("response Headers:", resp.Header)
 	respBody, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println("response Body:", string(respBody))
+	// fmt.Println("response Body:", string(respBody))
 
 	return respBody, string(resp.Status)
 }
