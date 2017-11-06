@@ -111,7 +111,7 @@ func GetAlarms(uuid string) string {
 			summary := strings.Split(i.Summary, "|")
 			if summary[0] == uuid {
 				date := before(when, "T")
-				hm := between(when, "T", ":00+")
+				hm := between(when, "T", ":00")
 				alarms += summary[1] + " on " + date + " at " + hm + "\n"
 			}
 		}
@@ -121,7 +121,7 @@ func GetAlarms(uuid string) string {
 	return alarms
 }
 
-// GetAlarms gets user next alarms from calendar
+// DeleteAlarm deletes alarm with given time and uuid
 func DeleteAlarm(uuid string, alarmTime string) string {
 	connectGoogleCalendar()
 	t := time.Now().Format(time.RFC3339)
@@ -145,8 +145,10 @@ func DeleteAlarm(uuid string, alarmTime string) string {
 			// alarmTime, _ := time.Parse("2016-01-02T15:04:05", when)
 			summary := strings.Split(i.Summary, "|")
 			if summary[0] == uuid && strings.Contains(summary[1], alarmTime) {
-				srv.Events.Delete("primary", i.Id).Do()
-				break
+				err := srv.Events.Delete("primary", i.Id).Do()
+				if err != nil {
+					return "could not delete alarm err: " + err.Error()
+				}
 			}
 		}
 	} else {
