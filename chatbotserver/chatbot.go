@@ -41,6 +41,10 @@ func sampleProcessor(session Session, message string, uuid string) (string, erro
 			alarms := GetAlarms(uuid)
 			return alarms, nil
 		}
+		if strings.Contains(message, "delete") {
+			deleteAlarm := DeleteAlarm(uuid, after(message, ": "))
+			return deleteAlarm, nil
+		}
 		singerName := between(message, "want", "to")
 		alarmTime := after(message, "at")
 		if singerName == "" || alarmTime == "" {

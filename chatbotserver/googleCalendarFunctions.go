@@ -90,12 +90,12 @@ func GetAlarms(uuid string) string {
 	connectGoogleCalendar()
 	t := time.Now().Format(time.RFC3339)
 	events, err := srv.Events.List("primary").ShowDeleted(false).
-		SingleEvents(true).TimeMin(t).MaxResults(10).OrderBy("startTime").Do()
+		SingleEvents(true).TimeMin(t).OrderBy("startTime").Do()
 	if err != nil {
 		log.Fatalf("Unable to retrieve next ten of the user's events. %v", err)
 	}
 	alarms := ""
-	alarms += "Upcoming events: \n\n"
+	alarms += "Upcoming alarms: \n\n"
 	if len(events.Items) > 0 {
 		for _, i := range events.Items {
 			var when string
@@ -111,14 +111,48 @@ func GetAlarms(uuid string) string {
 			summary := strings.Split(i.Summary, "|")
 			if summary[0] == uuid {
 				date := before(when, "T")
-				hm := between(when, "T", ":00")
+				hm := between(when, "T", ":00+")
 				alarms += summary[1] + " on " + date + " at " + hm + "\n"
 			}
 		}
 	} else {
-		alarms = "No upcoming events found.\n"
+		alarms = "No upcoming alarms found.\n"
 	}
 	return alarms
+}
+
+// GetAlarms gets user next alarms from calendar
+func DeleteAlarm(uuid string, alarmTime string) string {
+	connectGoogleCalendar()
+	t := time.Now().Format(time.RFC3339)
+	events, err := srv.Events.List("primary").ShowDeleted(false).
+		SingleEvents(true).TimeMin(t).OrderBy("startTime").Do()
+	if err != nil {
+		log.Fatalf("Unable to retrieve next ten of the user's alarms. %v", err)
+	}
+
+	if len(events.Items) > 0 {
+		for _, i := range events.Items {
+			var when string
+			// If the DateTime is an empty string the Event is an all-day Event.
+			// So only Date is available.
+			if i.Start.DateTime != "" {
+				when = i.Start.DateTime
+			} else {
+				when = i.Start.Date
+			}
+			when = before(when, "+")
+			// alarmTime, _ := time.Parse("2016-01-02T15:04:05", when)
+			summary := strings.Split(i.Summary, "|")
+			if summary[0] == uuid && strings.Contains(summary[1], alarmTime) {
+				srv.Events.Delete("primary", i.Id).Do()
+				break
+			}
+		}
+	} else {
+		return "No alarm with this time found.\n"
+	}
+	return "alarm deleted successfully"
 }
 
 // getClient uses a Context and Config to retrieve a Token
