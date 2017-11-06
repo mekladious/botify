@@ -53,7 +53,7 @@ func handleWelcome(w http.ResponseWriter, r *http.Request) {
 	//starting to connect to Spotify
 	if SpotifyAuthorizationToken == "" {
 		log.Print("No spotify authorization token.. started to get one")
-		SpotifyAuthorizationToken = AuthorizeSpotify()
+		SpotifyAuthorizationToken = getNewSpotifyToken()
 	}
 
 	// Write a JSON containg the welcome message and the generated UUID

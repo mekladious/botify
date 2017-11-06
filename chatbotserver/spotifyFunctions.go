@@ -8,6 +8,9 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -27,6 +30,32 @@ type (
 
 // AuthorizeSpotify is a function to authorizing with spotify
 func AuthorizeSpotify() string {
+
+	cacheFile, err := spotifyTokenCacheFile()
+	if err != nil {
+		log.Fatalf("Unable to get path to cached spotify token file. %v", err)
+	}
+	tok, err := spotifyTokenFromFile(cacheFile)
+	if err != nil {
+		tok = getSpotifyTokenFromWeb()
+		saveSpotifyToken(cacheFile, tok)
+	}
+	return tok
+}
+
+func getNewSpotifyToken() string {
+
+	cacheFile, err := spotifyTokenCacheFile()
+	if err != nil {
+		log.Fatalf("Unable to get path to cached spotify token file. %v", err)
+	}
+	tok := getSpotifyTokenFromWeb()
+	saveSpotifyToken(cacheFile, tok)
+
+	return tok
+}
+
+func getSpotifyTokenFromWeb() string {
 	//create a headers map
 	url := "https://accounts.spotify.com/api/token"
 	var jsonStr = []byte(`grant_type=client_credentials`)
@@ -50,6 +79,37 @@ func AuthorizeSpotify() string {
 	spotifyAuthorizationToken, _ := bodyJSON["access_token"].(string)
 	fmt.Println("spotify access token:", spotifyAuthorizationToken)
 	return spotifyAuthorizationToken
+}
+
+func saveSpotifyToken(file string, token string) {
+	fmt.Printf("Saving spotify token file to: %s\n", file)
+	f, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
+	if err != nil {
+		log.Fatalf("Unable to cache oauth token: %v", err)
+	}
+	defer f.Close()
+	json.NewEncoder(f).Encode(token)
+}
+
+func spotifyTokenFromFile(file string) (string, error) {
+	f, err := os.Open(file)
+	if err != nil {
+		return "", err
+	}
+	t := ""
+	err = json.NewDecoder(f).Decode(t)
+	defer f.Close()
+	return t, err
+}
+
+func spotifyTokenCacheFile() (string, error) {
+	tokenCacheDir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		log.Fatal(err)
+	}
+	os.MkdirAll(tokenCacheDir, 0700)
+	return filepath.Join(tokenCacheDir,
+		url.QueryEscape("spotifyToken.json")), nil
 }
 
 func Get_featured_playlists() string {
