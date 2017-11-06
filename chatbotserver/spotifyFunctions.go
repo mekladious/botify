@@ -263,6 +263,18 @@ func get_favorites(uuid string) (string, error) {
 	return res, err
 }
 
+func delete_favorite(uuid string, trackName string) (string, error) {
+	db, err := mgo.Dial(db_uri)
+	collection := db.DB("botify").C("Favorites")
+
+	err = collection.Remove(bson.M{"uuid": uuid, "trackName": trackName})
+	if err != nil {
+		return "error happenned while deleting ", err
+	}
+
+	return trackName + " deleted successfully", err
+}
+
 func sendGetRequest(url string, body string) ([]byte, string) {
 	defer func() {
 		fmt.Println("Recovered from get request error: ", recover())

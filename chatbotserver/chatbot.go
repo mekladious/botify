@@ -127,9 +127,7 @@ func sampleProcessor(session Session, message string, uuid string) (string, erro
 			return "No results were found for your search, please try again", nil
 		}
 
-	}
-
-	if strings.Contains(strings.ToLower(message), "new") && strings.Contains(strings.ToLower(message), "release") {
+	} else if strings.Contains(strings.ToLower(message), "new") && strings.Contains(strings.ToLower(message), "release") {
 		newReleases := get_new_releases()
 		return newReleases, nil
 	} else if strings.Contains(strings.ToLower(message), "favorite") {
@@ -145,8 +143,11 @@ func sampleProcessor(session Session, message string, uuid string) (string, erro
 		} else if strings.Contains(strings.ToLower(message), "show") {
 			res, err := get_favorites(uuid)
 			return res, err
+		} else if strings.Contains(strings.ToLower(message), "delete") {
+			res, err := delete_favorite(uuid, after(message, ":"))
+			return res, err
 		} else {
-			return "supported functions: add, show", nil
+			return "supported functions: add, show, delete", nil
 		}
 	} else {
 		result := checkForSymbols(UnknownAnswer(message))
