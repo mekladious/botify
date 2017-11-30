@@ -100,16 +100,14 @@ func handleChat(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Process the received message
-	message, err := processor(session, data["message"].(string), uuid)
+	message, images, err := processor(session, data["message"].(string), uuid)
 	if err != nil {
 		http.Error(w, err.Error(), 422 /* http.StatusUnprocessableEntity */)
 		return
 	}
 
 	// Write a JSON containg the processed response
-	writeJSON(w, JSON{
-		"message": message,
-	})
+	writeJSON(w, JSON{"message": message, "images": images})
 }
 
 // handle Handles /

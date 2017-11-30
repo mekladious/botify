@@ -153,20 +153,20 @@ func Get_artist_id(singerName string) (string, error) {
 	return strings.TrimLeft(strings.TrimRight(ids.String(), "\"]"), "[\""), nil
 }
 
-func Get_artist_info(singerName string) string {
+func Get_artist_info(singerName string) (string, string) {
 	singerName = strings.Replace(singerName, " ", "%20", -1) // replacing spaces by %20 as required by spotify api
 	artist_id, err := Get_artist_id(singerName)
 
 	if err != nil {
-		return err.Error()
+		return err.Error(), ""
 	}
 
 	body, _ := sendGetRequest("v1/artists/"+artist_id, "")
 	jsonParsed, _ := gabs.ParseJSON(body)
 
-	artistInfo := stringfyArtist(jsonParsed)
+	artistInfo, images := stringfyArtist(jsonParsed)
 
-	return artistInfo
+	return artistInfo, images
 }
 
 func get_new_releases() string {
@@ -195,7 +195,7 @@ func min(x int, y int) int {
 	}
 }
 
-func search(keyword string) string {
+func search(keyword string) (string, string) {
 	// artist, _ := sendGetRequest("v1/search?q="+keyword+"&type=artist", "")
 	// artistJsonParsed, _ := gabs.ParseJSON(artist)
 	playlist, _ := sendGetRequest("v1/search?q="+keyword+"&type=playlist", "")
@@ -207,7 +207,8 @@ func search(keyword string) string {
 
 	result := "Artists: \n\n"
 	// result += stringfyArtist(artistJsonParsed)
-	result += Get_artist_info(keyword)
+	artist_info, images := Get_artist_info(keyword)
+	result += artist_info
 	result += "\n\n Playlists: \n\n"
 	result += stringfyJSON(playlistJsonParsed, "playlist")
 	result += "\n\n Albums: \n\n"
@@ -215,7 +216,7 @@ func search(keyword string) string {
 	result += "\n\n Tracks: \n\n"
 	result += stringfyJSON(trackJsonParsed, "track")
 
-	return string(result)
+	return string(result), images
 }
 
 func getTrackID(trackName string) string {
@@ -306,7 +307,7 @@ func sendGetRequest(url string, body string) ([]byte, string) {
 	return respBody, string(resp.Status)
 }
 
-func stringfyArtist(jsonParsed *gabs.Container) string {
+func stringfyArtist(jsonParsed *gabs.Container) (string, string) {
 	name := jsonParsed.Path("name").Data().(string)
 	followers := jsonParsed.Path("followers.total").Data().(float64)
 
@@ -344,9 +345,9 @@ func stringfyArtist(jsonParsed *gabs.Container) string {
 	sFinal := ""
 	sFinal += name + "\n" +
 		"has " + f + " followers\n" +
-		"specializes in " + s5 + ".\n" +
-		"Pictures: " + s6
-	return sFinal
+		"specializes in " + s5 + ".\n" // +
+	// "Pictures: " + s6
+	return sFinal, s6
 }
 
 func stringfyJSON(jsonParsed *gabs.Container, jsontype string) string {
