@@ -135,7 +135,7 @@ func Get_artist_tracks(singerName string) (string, error) {
 
 	tracks := jsonParsed.Path("tracks.preview_url")
 
-	return tracks.String(), nil
+	return tracks.Index(0).String(), nil
 }
 
 func Get_artist_id(singerName string) (string, error) {
