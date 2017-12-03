@@ -45,17 +45,17 @@ func UnknownAnswer(message string) string {
 
 	//var acceptedAnswers []acceptedAnswer
 	for _, result := range results {
+		result.Question = strings.ToLower(result.Question)
 		answer := result.Answer
 		var replaced_var_index []int
 		contain_var := false
 		var_name := ""
 		if strings.Contains(result.Question, "_") {
-			fmt.Println(result.Question)
 			//replacing any variable _v_ in db question with regex to be compared in the next step with the input question
 			reg := regexp.MustCompile(`_[a-z0-9]+_`)
 			replaced_var_index = reg.FindIndex([]byte(result.Question))
 			var_name = reg.FindString(result.Question)
-			regex_db_question := string(reg.ReplaceAll([]byte(result.Question), []byte("[a-z]{3,}\\s*")))
+			regex_db_question := string(reg.ReplaceAll([]byte(result.Question), []byte("[a-z]{3,}")))
 			result.Question = regex_db_question
 			contain_var = true
 		}
@@ -63,7 +63,6 @@ func UnknownAnswer(message string) string {
 		//cheking message with DB question
 		r := regexp.MustCompile(result.Question)
 		if r.MatchString(message) {
-			fmt.Println(result.Question)
 			if contain_var { // get variable from question
 				//answer = result.Question[0:replaced_var_index[0]]
 				variable_value := ""
