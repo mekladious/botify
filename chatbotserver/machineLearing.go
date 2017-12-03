@@ -42,9 +42,13 @@ func UnknownAnswer(message string) string {
 	return results[0].Answer
 }
 
-func checkForSymbols(answer string) string {
+func checkForSymbols(answer string, session Session, uuid string) (string, string, string, string, error) {
 	if strings.Contains(answer, "#Get_featured_playlists") {
 		answer = strings.Replace(answer, "#Get_featured_playlists", Get_featured_playlists(), -1)
+	} else if strings.Contains(answer, "=") { // = means that the message was equivalent to some message go process the equivalent message and return the result
+		message, images, tracks, alarmTime, err := sampleProcessor(session, after(answer, "="), uuid)
+		return message, images, tracks, alarmTime, err
 	}
-	return answer
+
+	return answer, "", "", "", nil
 }
