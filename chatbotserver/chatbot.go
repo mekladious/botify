@@ -143,9 +143,9 @@ func sampleProcessor(session Session, message string, uuid string) (string, stri
 			return "", "supported functions: add, show, delete", "", "", nil
 		}
 	} else {
-		result := checkForSymbols(UnknownAnswer(message))
+		result, images, tracks, alarmTime, err := checkForSymbols(UnknownAnswer(message), session, uuid)
 		if result != "" {
-			return result, "", "", "", nil
+			return result, images, tracks, alarmTime, err
 		}
 	}
 
