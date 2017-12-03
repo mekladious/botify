@@ -322,9 +322,10 @@ func stringfyArtist(jsonParsed *gabs.Container) (string, string) {
 
 	}
 	s2 := strings.Split(s1, ",")
-	y := len(s2)
+	//y := len(s2)
 	s5 := ""
-	for i := 0; i < y-1; i++ {
+	//for i := 0; i < y-1; i++ {
+	for i := 0; i < 3; i++ {
 		s5 = s5 + s2[i] + " , "
 	}
 
@@ -383,10 +384,11 @@ func stringfyJSON(jsonParsed *gabs.Container, jsontype string) string {
 	}
 
 	s4 := strings.Split(s3, "$")
-	x := min(len(s2), len(s4))
+	//x := min(len(s2), len(s4))
 
 	sFinal := ""
-	for i := 0; i < x-1; i++ {
+	//for i := 0; i < x-1; i++ {
+	for i := 0; i < 3; i++ {
 		sFinal = sFinal + s2[i] + " : " + s4[i] + " \n"
 	}
 	return sFinal
