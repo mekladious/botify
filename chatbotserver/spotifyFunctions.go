@@ -244,6 +244,9 @@ func search(keyword string) (string, string) {
 		result += stringfiedTracks
 	}
 
+	if result == "" {
+		return "invalid artist", ""
+	}
 	return string(result), images
 }
 
