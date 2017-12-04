@@ -162,7 +162,6 @@ func Get_artist_id(singerName string) (string, error) {
 func Get_artist_info(singerName string) (string, string) {
 	singerName = strings.Replace(singerName, " ", "%20", -1) // replacing spaces by %20 as required by spotify api
 	artist_id, err := Get_artist_id(singerName)
-
 	if err != nil {
 		return err.Error(), ""
 	}
