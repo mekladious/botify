@@ -1,6 +1,7 @@
 package chatbot
 
 import (
+	"regexp"
 	"strings"
 )
 
@@ -107,9 +108,9 @@ func sampleProcessor(session Session, message string, uuid string) (string, stri
 	} else if strings.Contains(strings.ToLower(message), "search") || strings.Contains(strings.ToLower(message), "play") {
 		message = strings.Replace(message, "search", "", -1)
 		message = strings.Replace(message, "play", "", -1)
+		reg, _ := regexp.Compile("[^a-zA-Z0-9\\s]+")
+		message = reg.ReplaceAllString(message, "")
 		message = strings.Replace(message, " ", "+", -1)
-		// reg, _ := regexp.Compile("[^a-zA-Z0-9]+")
-		// message = reg.ReplaceAllString(message, "")
 
 		results, images := search(message)
 
