@@ -201,6 +201,14 @@ func min(x int, y int) int {
 	}
 }
 
+func max(x int, y int) int {
+	if x < y {
+		return y
+	} else {
+		return x
+	}
+}
+
 func search(keyword string) (string, string) {
 	// artist, _ := sendGetRequest("v1/search?q="+keyword+"&type=artist", "")
 	// artistJsonParsed, _ := gabs.ParseJSON(artist)
@@ -211,16 +219,31 @@ func search(keyword string) (string, string) {
 	track, _ := sendGetRequest("v1/search?q="+keyword+"&type=track", "")
 	trackJsonParsed, _ := gabs.ParseJSON(track)
 
-	result := "Artists: \n\n"
-	// result += stringfyArtist(artistJsonParsed)
+	result := ""
+
 	artist_info, images := Get_artist_info(keyword)
-	result += artist_info
-	result += "\n\n Playlists: \n\n"
-	result += stringfyJSON(playlistJsonParsed, "playlist")
-	result += "\n\n Albums: \n\n"
-	result += stringfyJSON(albumJsonParsed, "album")
-	result += "\n\n Tracks: \n\n"
-	result += stringfyJSON(trackJsonParsed, "track")
+	if artist_info != "invalid artist" {
+		result += "Artists: \n\n"
+		result += artist_info
+	}
+
+	stringfiedPlaylists := stringfyJSON(playlistJsonParsed, "playlist")
+	if len(stringfiedPlaylists) > 0 {
+		result += "\n\n Playlists: \n\n"
+		result += stringfiedPlaylists
+	}
+
+	stringfiedAlbum := stringfyJSON(albumJsonParsed, "album")
+	if len(stringfiedAlbum) > 0 {
+		result += "\n\n Albums: \n\n"
+		result += stringfiedAlbum
+	}
+
+	stringfiedTracks := stringfyJSON(trackJsonParsed, "track")
+	if len(stringfiedTracks) > 0 {
+		result += "\n\n Tracks: \n\n"
+		result += stringfiedTracks
+	}
 
 	return string(result), images
 }
@@ -328,10 +351,10 @@ func stringfyArtist(jsonParsed *gabs.Container) (string, string) {
 
 	}
 	s2 := strings.Split(s1, ",")
-	//y := len(s2)
+	y := len(s2)
 	s5 := ""
 	//for i := 0; i < y-1; i++ {
-	for i := 0; i < 3; i++ {
+	for i := 0; i < min(3, y-1); i++ {
 		s5 = s5 + s2[i] + " , "
 	}
 
@@ -390,11 +413,11 @@ func stringfyJSON(jsonParsed *gabs.Container, jsontype string) string {
 	}
 
 	s4 := strings.Split(s3, "$")
-	//x := min(len(s2), len(s4))
+	x := min(len(s2), len(s4))
 
 	sFinal := ""
 	//for i := 0; i < x-1; i++ {
-	for i := 0; i < 3; i++ {
+	for i := 0; i < min(3, x-1); i++ {
 		sFinal = sFinal + s2[i] + " : " + s4[i] + " \n"
 	}
 	return sFinal
