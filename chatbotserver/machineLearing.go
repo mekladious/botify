@@ -84,7 +84,7 @@ func UnknownAnswer(message string) string {
 	// for _, aa := range acceptedAnswers {
 	// 	fmt.Println(aa.Answer)
 	// }
-	return results[0].Answer
+	return ""
 }
 
 func checkForSymbols(answer string, session Session, uuid string) (string, string, string, string, error) {
