@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"os"
@@ -134,8 +135,13 @@ func Get_artist_tracks(singerName string) (string, error) {
 	jsonParsed, _ := gabs.ParseJSON(body)
 
 	tracks := jsonParsed.Path("tracks.preview_url")
-
-	return tracks.Index(0).String(), nil
+	tracks_len, err := tracks.ArrayCount()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	random_index := rand.Intn(tracks_len)
+	//fmt.Println("number of tracks", tracks_len)
+	return tracks.Index(random_index).String(), nil
 }
 
 func Get_artist_id(singerName string) (string, error) {
